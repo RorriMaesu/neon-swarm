@@ -95,4 +95,5 @@ Open index.html or double-click Play Neon Swarm.cmd to play. This folder is upda
 - Welded and optimized both meshes to 2,700 triangles, created 17-bone bipeds, and authored 24-pose running loops in local Blender.
 - Added shared base-color atlases and UVs to the crowd renderer, retaining five or fewer character draws. Standard animated GLBs and editable Blender scenes are saved.
 - Added an offline character gallery with rotation, animation pause, downloads and a 150-pursuer/18-guardian crowd drill.
-- Browser, mobile-layout and final publishing results are recorded in QA.md as verification completes.
+- All 48 checks passed; desktop combat, 320/390-pixel gallery layouts, phone steering, pause and saving passed. The 168-character gallery drill uses four scene draws. The complete Desktop checkpoint and source archive are verified.
+- Release code/assets were pushed as commit `e80de09`. GitHub Pages run [37373464177](https://github.com/RorriMaesu/neon-swarm/actions/runs/37373464177) is queued without a runner during the [October 5 Actions incident](https://www.githubstatus.com/incidents/3q1yb5m7ltvb). The public game still showed 2.3.1 at this checkpoint; hosted 2.4 verification is pending.
