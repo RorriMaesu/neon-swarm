@@ -12,3 +12,12 @@
 - Final balance polish: endless enemy and boss toughness accelerates after sector three, so a strong squad still faces increasing pressure. The campaign and daily balance are preserved.
 
 Open index.html or double-click Play Neon Swarm.cmd to play. This folder is updated throughout development.
+
+## Bodyguard 2.0 checkpoint
+
+- Rebuilt campaign growth, capsule defense, four combat profiles, warnings, weapon caps, and Overdrive.
+- All 28 chapters are selectable, with 224 concepts, three prompt forms, 16 pathways, and two original scanner diagrams.
+- Added untimed Focus encounters, independent knowledge settings, hints, explanations, spaced retries, Study mode, and a final-boss knowledge sequence.
+- Saved missions restore combat and learning; sector retry, export/import, and version 1 record migration are implemented.
+- 25 rule and learning checks passed; a 480-run balance audit and desktop/phone-layout browser checks passed.
+- The playable Desktop copy is updated as development progresses. Content and physical-device review limits are recorded in QA.md.

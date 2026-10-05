@@ -22,11 +22,13 @@ jobs:
         run: |
           node --check core.js
           node --check game.js
-          node --test tests/core.test.js
+          node --check curriculum.js
+          node --check learning.js
+          node --test tests/*.test.js
       - name: Prepare the static game
         run: |
           mkdir -p _site
-          cp index.html style.css core.js game.js .nojekyll _site/
+          cp index.html style.css core.js curriculum.js learning.js game.js LICENSE.md CONTENT.md .nojekyll _site/
           cp -r assets vendor _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4

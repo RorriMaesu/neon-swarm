@@ -21,27 +21,27 @@ test('daily seed follows the local date and repeats exactly',()=>{
 });
 test('the selected gate is applied once, according to squad center',()=>{
   const g=new Game('campaign',8);g.enemies=[];g.gates=[{id:999,z:12.8,offset:0,left:{op:'×',value:2},right:{op:'−',value:3}}];g.x=-2;g.targetX=-2;
-  g.update(1/60);assert.equal(g.count,10);g.update(1/60);assert.equal(g.count,10);assert.equal(g.gates.length,0);
+  g.update(1/60);assert.equal(g.count,12);g.update(1/60);assert.equal(g.count,12);assert.equal(g.gates.length,0);
 });
 test('a crate must break and its pickup must be collected to award recruits',()=>{
   const g=new Game('campaign',9);g.gates=[];g.crates=[{id:777,x:0,z:11,kind:'recruits',amount:8,hp:1,maxHp:1}];
-  g.update(1/60);assert.equal(g.count,5);
+  g.update(1/60);assert.equal(g.count,6);
   for(let i=0;i<30;i++)g.update(1/60);
-  assert(g.count>=13);assert(g.drainEvents().some(e=>e.type==='crateBreak'));
+  assert(g.count>=14);assert(g.drainEvents().some(e=>e.type==='crateBreak'));
 });
 test('shields absorb damage first; losing the final bot produces one result',()=>{
-  const g=new Game();g.shield=3;g.hitSquad(2,0,13);assert.equal(g.count,5);assert.equal(g.shield,1);
-  g.hitSquad(3,0,13);assert.equal(g.count,3);assert.equal(g.shield,0);
+  const g=new Game();g.shield=3;g.hitSquad(2,0,13);assert.equal(g.count,6);assert.equal(g.shield,1);
+  g.hitSquad(3,0,13);assert.equal(g.count,4);assert.equal(g.shield,0);
   g.invulnerable=0;g.hitSquad(9,0,13);assert.equal(g.count,0);assert.equal(g.phase,'result');
   g.finish(false);assert.equal(g.drainEvents().filter(e=>e.type==='result').length,1);
 });
 test('Overdrive is earned and clears enemies, damages the boss, and resets charge',()=>{
   const g=new Game();assert.equal(g.useOverdrive(),false);g.charge=100;g.spawnWave();g.spawnBoss();const hp=g.boss.hp;
-  assert.equal(g.useOverdrive(),true);assert.equal(g.charge,0);assert.equal(g.enemies.length,0);assert(g.boss.hp<hp);assert.equal(g.overdrive,4);
+  assert.equal(g.useOverdrive(),true);assert.equal(g.charge,0);assert.equal(g.enemies.length,0);assert(g.boss.hp<hp);assert.equal(g.overdrive,2);
 });
 test('boss victories advance campaign and daily, while endless keeps going',()=>{
   for(const [mode,last]of [['campaign',3],['daily',2],['endless',4]]){
-    const g=new Game(mode,1);g.spawnBoss();g.bossKilled();assert.equal(g.phase,'upgrade');g.nextSector('damage');assert.equal(g.sector,2);assert(g.damage>1);
+    const g=new Game(mode,1);g.spawnBoss();g.bossKilled();assert.equal(g.phase,'upgrade');const before=g.damage;g.nextSector('damage');assert.equal(g.sector,2);assert(g.damage>before);
     g.sector=last;g.spawnBoss();g.bossKilled();assert.equal(g.phase,mode==='endless'?'upgrade':'result');
   }
 });

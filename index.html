@@ -1,80 +1,29 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#101b24">
-  <meta name="description" content="The game from the ads. Actually. Grow a robot squad, blast scrap swarms, and conquer the skyway. A free 3D arcade shooter for desktop and mobile.">
-  <title>Neon Swarm — little bots, big trouble</title>
-  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=1.0.2">
-  <script defer src="vendor/three.min.js"></script>
-  <script defer src="core.js?v=1.0.2"></script>
-  <script defer src="game.js?v=1.0.2"></script>
-</head>
-<body>
-  <header class="topbar">
-    <a class="brand" href="./" aria-label="Neon Swarm home"><span class="brand-icon">✳</span> NEON<span>SWARM</span><sup>01</sup></a>
-    <div class="tagline"><span class="status-dot"></span> THE GAME FROM THE ADS. ACTUALLY.</div>
-    <div class="tools">
-      <button class="icon-btn" id="sound-btn" aria-label="Enable sound" title="Sound">♪<span class="off-slash"></span></button>
-      <button class="icon-btn" id="help-btn" aria-label="How to play" title="How to play">?</button>
-      <button class="icon-btn" id="settings-btn" aria-label="Settings" title="Settings">⚙</button>
-      <button class="icon-btn desktop-only" id="fullscreen-btn" aria-label="Enter fullscreen" title="Fullscreen">⛶</button>
-    </div>
-  </header>
-  <main class="shell">
-    <aside class="brief">
-      <div class="eyebrow"><span>AN ARCADE FIELD TRIP</span><span>↗</span></div>
-      <h1>Little bots.<br>Big <em>trouble.</em></h1>
-      <p class="intro">Start small. Pick the good gates.<br>Become the whole firing squad.</p>
-      <div class="divider"></div>
-      <div class="section-label">PICK YOUR RUN <span>01—03</span></div>
-      <div class="modes" aria-label="Game mode">
-        <button class="mode active" data-mode="campaign" aria-pressed="true"><span class="mode-symbol">↗</span><span><strong>Skyway run</strong><small>3 sectors · boss battles</small></span><span class="mode-arrow">↗</span></button>
-        <button class="mode" data-mode="endless" aria-pressed="false"><span class="mode-symbol">∞</span><span><strong>Endless rush</strong><small>How big can you go?</small></span><span class="mode-arrow">↗</span></button>
-        <button class="mode" data-mode="daily" aria-pressed="false"><span class="mode-symbol">◈</span><span><strong>Daily circuit</strong><small>One seed. A fresh challenge.</small></span><span class="mode-arrow">↗</span></button>
-      </div>
-      <button class="launch primary" id="start-btn">LET’S MAKE A SWARM <span>↗</span></button>
-      <div class="controls-hint"><kbd>A</kbd><kbd>D</kbd> or drag to steer <span>·</span> auto-fire</div>
-      <div class="brief-footer"><span class="micro-bot">▣</span><p>No ads. No energy timers.<br><strong>Just the good bit.</strong></p><span class="v-label">v1.0.2</span></div>
-    </aside>
-    <section class="arena" id="arena" aria-label="3D game area">
-      <div id="scene" aria-label="Robot squad defending a neon skyway"></div>
-      <div class="arena-vignette"></div>
-      <div class="hud-top">
-        <div class="sector-caption"><span id="sector-number">SECTOR 01 / 03</span><strong id="sector-name">THE SKYWAY</strong></div>
-        <div class="run-clock" id="run-clock">00:00</div>
-        <button class="pause-btn hidden" id="pause-btn" aria-label="Pause game">Ⅱ</button>
-      </div>
-      <div class="hud-stats hidden" id="hud-stats"><div><small>SQUAD</small><strong id="squad-count">5</strong></div><div><small>SCORE</small><strong id="score-count">0</strong></div><div class="shield-stat"><small>SHIELD</small><strong id="shield-count">0</strong></div></div>
-      <div class="wave-track"><div id="wave-progress"></div></div>
-      <div class="boss-hud hidden" id="boss-hud"><div><span id="boss-name">THE SCRAP KING</span><span id="boss-hp-label">100%</span></div><div class="boss-track"><div id="boss-health"></div></div></div>
-      <div class="announcer" id="announcer" aria-live="polite"></div>
-      <div class="float-labels" id="float-labels"></div>
-      <div class="attract-caption" id="attract-caption"><span class="live-pill"><i></i> NO DOWNLOAD. JUST PLAY.</span><h2>Small squad.<br><span>Massive possibilities.</span></h2><p>Multiply. Upgrade. Overwhelm.</p></div>
-      <div class="mobile-launch" id="mobile-launch"><div class="mobile-mode-list"><button data-mode="campaign" class="active">Skyway</button><button data-mode="endless">Endless</button><button data-mode="daily">Daily</button></div><button class="primary" id="mobile-start">LET’S MAKE A SWARM <span>↗</span></button><p>Drag to steer. Your bots do the shooting.</p></div>
-      <div class="play-bottom hidden" id="play-bottom"><div class="weapon-info"><small>LOADOUT</small><strong id="weapon-name">PULSE BLASTER</strong><span id="weapon-level">LV. 1</span></div><button class="surge-btn" id="surge-btn" disabled><span>✳</span><div><strong>OVERDRIVE</strong><small id="surge-label">CHARGING · 0%</small></div><kbd>SPACE</kbd><i id="surge-fill"></i></button></div>
-      <div class="stage-footer" id="stage-footer"><span>SKYWAY / NEO-TOKYO</span><span>DRAG TO STEER ↔</span></div>
-      <div class="error-panel hidden" id="error-panel"><h2>The skyway couldn’t load.</h2><p id="error-text">Please try a browser with WebGL enabled.</p><button class="primary" onclick="location.reload()">TRY AGAIN ↗</button></div>
-      <noscript><div class="error-panel"><h2>Enable JavaScript to play.</h2><p>This game runs entirely in your browser.</p></div></noscript>
-    </section>
-    <aside class="telemetry">
-      <div class="section-label">FIELD NOTES <span>↙</span></div>
-      <div class="mission-card"><span class="card-index">01 / YOUR MISSION</span><h3>Rescue the bots.<br>Reclaim the city.</h3><p>The scrap swarm has taken over. Bring friends. Lots of friends.</p><div class="city-map" aria-hidden="true"><i></i><i></i><i></i><span>↗</span><i></i><i></i></div><span class="coordinate">35°40′ N &nbsp; 139°45′ E</span></div>
-      <div class="rule"><span class="rule-icon mint">+8</span><div><strong>Make the number bigger</strong><p>Green gates grow your squad.</p></div></div>
-      <div class="rule"><span class="rule-icon violet">▣</span><div><strong>Break it to take it</strong><p>Shoot crates for new gear.</p></div></div>
-      <div class="rule"><span class="rule-icon coral">✳</span><div><strong>Let it all out</strong><p>Overdrive clears a path.</p></div></div>
-      <div class="record-card"><span class="section-label">PERSONAL BEST</span><strong id="best-score">000000</strong><span id="best-caption">Your first big run awaits.</span></div>
-      <button id="field-guide-btn" class="text-btn">OPEN THE FIELD GUIDE <span>↗</span></button>
-    </aside>
-  </main>
-  <div class="modal-backdrop hidden" id="modal-backdrop">
-    <section class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
-      <button class="modal-close icon-btn" id="modal-close" aria-label="Close dialog">×</button>
-      <div id="modal-content"></div>
-    </section>
-  </div>
-  <div class="toast" id="toast" role="status"></div>
-</body>
-</html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101b24"><meta name="description" content="Defend the capsule. Build your squad. Learn anatomy and physiology across 28 chapters, with four combat difficulties and untimed practice.">
+<title>Neon Swarm: Bodyguard — play, discover, remember</title>
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=2.0.0">
+<script defer src="vendor/three.min.js"></script><script defer src="core.js?v=2.0.0"></script><script defer src="curriculum.js?v=2.0.0"></script><script defer src="learning.js?v=2.0.0"></script><script defer src="game.js?v=2.0.0"></script>
+</head><body>
+<header class="topbar"><a class="brand" href="./" aria-label="Neon Swarm Bodyguard home"><span class="brand-icon">✳</span> NEON<span>SWARM</span><sup>02</sup></a><div class="tagline"><span class="status-dot"></span> BODYGUARD / PLAY. DISCOVER. REMEMBER.</div><div class="tools"><button class="icon-btn" id="sound-btn" aria-label="Enable sound" title="Sound">♪<span class="off-slash"></span></button><button class="icon-btn" id="help-btn" aria-label="How to play">?</button><button class="icon-btn" id="settings-btn" aria-label="Settings">⚙</button><button class="icon-btn desktop-only" id="fullscreen-btn" aria-label="Enter fullscreen">⛶</button></div></header>
+<main class="shell">
+<aside class="brief" aria-label="Mission setup">
+<div class="eyebrow"><span>THE BODY IS YOUR PLAYGROUND</span><span>↗</span></div><h1>Build your squad.<br>Know your <em>body.</em></h1><p class="intro">Defend a research capsule. Solve the systems that keep us going.</p>
+<div class="mode-tabs" aria-label="Game mode"><button data-mode="lesson" class="active" aria-pressed="true">Chapter mission</button><button data-mode="study" aria-pressed="false">Study</button><button data-mode="campaign" aria-pressed="false">Arcade</button><button data-mode="endless" aria-pressed="false">Endless</button><button data-mode="daily" aria-pressed="false">Daily</button></div>
+<div id="chapter-settings"><label class="setup-label" for="chapter-select">YOUR CHAPTER <button class="text-btn inline-btn" id="browse-btn">EXPLORE ALL 28 ↗</button></label><select id="chapter-select" class="setup-select" aria-label="Chapter"></select><label class="setup-label" for="topic-select">PRACTICE FOCUS</label><select id="topic-select" class="setup-select"><option value="all">Whole chapter · selected core concepts</option><option>Structure &amp; identity</option><option>Function &amp; regulation</option></select><label class="setup-label" for="knowledge-select">LEARNING CHALLENGE</label><select id="knowledge-select" class="setup-select"><option value="foundations">Foundations · identify</option><option value="connections">Connections · explain the role</option><option value="application">Application · use a scenario</option></select><p class="setup-note">Questions are untimed at every difficulty.</p></div>
+<div id="combat-settings"><label class="setup-label" for="difficulty-select">COMBAT DIFFICULTY</label><select id="difficulty-select" class="setup-select"><option value="explorer">Explorer · generous warnings</option><option value="standard">Standard · active defense</option><option value="veteran">Veteran · mixed threats</option><option value="expert">Expert · intense pressure</option></select><p class="setup-note" id="difficulty-note"></p></div>
+<div class="launch-actions"><button class="launch primary" id="start-btn">START CHAPTER MISSION <span>↗</span></button><button class="secondary resume-run hidden" id="resume-run">CONTINUE SAVED MISSION ↗</button></div><div class="controls-hint" id="controls-hint"><kbd>A</kbd><kbd>D</kbd> or drag to steer · auto-fire</div><p class="progress-caption" id="progress-caption"></p><div class="brief-footer"><span class="micro-bot">▣</span><p>No ads. No timers.<br><strong>Progress stays with you.</strong></p><span class="v-label">v2.0.0</span></div>
+</aside>
+<section class="arena" id="arena" aria-label="Body simulation arena"><div id="scene" aria-label="Repair bots defending a capsule in a stylized body simulation"></div><div class="arena-vignette"></div>
+<div class="hud-top"><div class="sector-caption"><span id="sector-number">BODYGUARD / CHAPTER 01</span><strong id="sector-name">ORIENTATION GRID</strong></div><div class="run-clock" id="run-clock">00:00</div><button class="pause-btn hidden" id="pause-btn" aria-label="Pause game">Ⅱ</button></div>
+<div class="hud-stats hidden" id="hud-stats"><div><small>SQUAD</small><strong id="squad-count">6</strong></div><div><small>CAPSULE</small><strong id="integrity-count">100</strong></div><div><small>SHIELD</small><strong id="shield-count">8</strong></div><div class="score-stat"><small>SCORE</small><strong id="score-count">0</strong></div></div>
+<div class="wave-track"><div id="wave-progress"></div></div><div class="capsule-track hidden" id="capsule-track" role="progressbar" aria-label="Capsule integrity" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><div id="capsule-progress"></div></div><div class="learning-hud hidden" id="learning-hud"></div>
+<div class="boss-hud hidden" id="boss-hud"><div><span id="boss-name">SYSTEM DISRUPTOR</span><span id="boss-hp-label">100%</span></div><div class="boss-track"><div id="boss-health"></div></div></div><div class="announcer" id="announcer" aria-live="polite"></div><div class="float-labels" id="float-labels"></div>
+<div class="attract-caption" id="attract-caption"><span class="live-pill"><i></i> 28 CHAPTERS. ONE BIG ADVENTURE.</span><h2>Small squad.<br><span>Meet the human body.</span></h2><p id="mission-preview">Choose a chapter. Defend. Discover.</p></div><div class="mobile-launch hidden" id="mobile-launch"><button id="mobile-start">START</button></div>
+<div class="play-bottom hidden" id="play-bottom"><div class="weapon-info"><small>LOADOUT</small><strong id="weapon-name">PULSE BLASTER</strong><span id="weapon-level">LV. 1</span></div><button class="surge-btn" id="surge-btn" disabled><span>✳</span><div><strong>OVERDRIVE</strong><small id="surge-label">CHARGING · 0%</small></div><kbd>SPACE</kbd><i id="surge-fill"></i></button></div><div class="stage-footer" id="stage-footer"><span>BODYGUARD / TRAINING SIMULATION</span><span>DRAG TO STEER ↔</span></div>
+<div class="error-panel hidden" id="error-panel"><h2>The 3D simulation couldn’t load.</h2><p id="error-text">Study mode is still available.</p><button class="primary" id="error-study">OPEN STUDY MODE ↗</button></div><noscript><div class="error-panel"><h2>Enable JavaScript to play.</h2><p>The game runs entirely in your browser.</p></div></noscript></section>
+<aside class="telemetry"><div class="section-label">MISSION BRIEF <span>↙</span></div><div class="mission-card"><span class="card-index" id="chapter-caption">CHAPTER 01 / ORGANIZATION</span><h3 id="chapter-title">An Introduction to the Human Body</h3><p id="chapter-description">Explore the structures, functions, and feedback that organize the body.</p><div class="concept-list" id="concept-list"></div></div><div class="rule"><span class="rule-icon mint">↔</span><div><strong>Defend the capsule</strong><p>Escaped enemies damage its integrity.</p></div></div><div class="rule"><span class="rule-icon violet">◎</span><div><strong>Focus. Aim. Discover.</strong><p>Threats pause while you solve a concept.</p></div></div><div class="record-card"><span class="section-label">PERSONAL BEST / THIS SETUP</span><strong id="best-score">000000</strong><span id="best-caption">Your first mission awaits.</span></div><button id="field-guide-btn" class="text-btn">OPEN THE FIELD GUIDE <span>↗</span></button></aside>
+</main><div class="modal-backdrop hidden" id="modal-backdrop"><section class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1"><button class="modal-close icon-btn" id="modal-close" aria-label="Close dialog">×</button><div id="modal-content"></div></section></div><div class="toast" id="toast" role="status"></div>
+<footer class="source-strip">Independent game · Access for free at <a href="https://openstax.org/books/anatomy-and-physiology-2e/pages/1-introduction" target="_blank" rel="noopener">OpenStax A&amp;P 2e</a> · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">Content: CC BY-NC-SA 4.0</a></footer>
+</body></html>

@@ -1,63 +1,61 @@
-# Neon Swarm
+# Neon Swarm: Bodyguard
 
-**The game from the ads. Actually.** An original 3D arcade shooter with a growing robot squad, arithmetic gates, shootable loot crates, incoming scrap swarms, and boss battles. Made for desktop and phone browsers.
+Build a squad of repair bots, defend a research capsule, and practice anatomy and physiology. Four combat settings and 28 selectable chapters. Free, static, and playable on desktop and phone browsers.
 
 ## Play
 
-Open **index.html**, or on Windows double-click **Play Neon Swarm.cmd**. The 3D engine is included, so the local copy works offline. No build step, account, ads, payments, or energy timers.
+[Play the published game](https://rorrimaesu.github.io/neon-swarm/).
 
-Once published: [Play on GitHub Pages](https://rorrimaesu.github.io/neon-swarm/).
+For the Desktop copy, double-click **Play Neon Swarm.cmd** or open **index.html**. All gameplay scripts, content, and 3D assets are included locally; textbook links and some device speech voices need an internet connection. No build step, sign-in, payment, or API key is required.
 
-### Controls
+Choose Chapter mission, Study, Arcade, Endless, or Daily. Study has no combat and remains usable when WebGL is unavailable. Any of the 28 chapters can be selected immediately. Chapter practice covers eight selected core concepts with three prompt forms, and some chapters also have pathways or scanners; it is not exhaustive coverage of the textbook.
 
-| Action | Desktop | Phone / tablet |
+## Controls
+
+| Action | Desktop | Phone |
 |---|---|---|
-| Steer | Hold A/D or left/right arrows; drag on the road | Drag horizontally on the road |
-| Shoot | Automatic | Automatic |
+| Steer | A/D, arrows, or drag | Drag horizontally |
+| Shoot in combat | Automatic | Automatic |
 | Overdrive | Space or purple button | Purple button |
+| Answer a question | Select a target; Enter or Fire answer | Select a target; Fire answer |
+| Select an answer by keyboard | Number keys | Onscreen targets |
 | Pause | P, Escape, or pause button | Pause button |
-| Sound / quality / reduced effects | Header controls | Header controls |
 
-Choose green + / × gates with the **center** of your squad. Red − / ÷ gates reduce your numbers. Shoot numbered crates until they break, then steer into the floating pickup. Shields absorb damage first. At 60 bots, extra recruits become score. Kills charge Overdrive, which clears the road and speeds up firing for four seconds. Boss target strips warn you before heavy bolts arrive.
+Combat, warnings, charge, and buffs freeze during Focus. Held controls cannot submit answers. Pathways require one stage at a time. Hints count as assisted practice. Wrong answers show an explanation and are revisited after intervening concepts or in a later session.
 
-### Modes
+Correct independent recall awards at most six bonus shield points per sector. Three final-boss decisions can expose a short weak point; the maximum reward is eight seconds with 25% additional boss damage. Knowledge progress is recorded separately from combat survival and score.
 
-- **Skyway run:** three sectors, three bosses, and an upgrade choice between sectors. A successful run takes roughly 2½ minutes.
-- **Endless rush:** increasingly difficult sectors until the last bot falls.
-- **Daily circuit:** two sectors with a shared seed for the local calendar date. Personal records are local to the browser; there is no global leaderboard.
+## Difficulty
 
-## Saved progress
+Explorer has generous warnings and shields. Standard requires active defense. Veteran adds mixed-wave pressure. Expert emphasizes demanding resource choices. Question complexity is independent: Foundations, Connections, or Application. Reading is untimed at every combat setting.
 
-Personal bests and preferences use browser local storage. Offline-file and hosted versions may keep separate records because their addresses differ. A run itself is not saved after closing the page. Losing focus pauses a live run.
+Escaped enemies damage capsule integrity, with a per-wave limit. Losing the capsule or all bots ends the run. Defeat offers a sector retry. Recruitment grows gradually, doubling is limited to recovery opportunities, weapon stacking is capped, and Overdrive weakens heavies without automatically breaking crates.
 
-## Files
+See **BALANCE.md** for measured simulation results and **QA.md** for verification and remaining device-testing limits.
 
-- `index.html` / `style.css`: responsive interface.
-- `core.js`: seeded, fixed-step gameplay rules, independent of the renderer.
-- `game.js`: original procedural 3D assets, instanced crowd rendering, input, synthesized sound, and interface.
-- `vendor/`: Three.js 0.160.1 and its license, bundled for offline use.
-- `DESIGN.md`: research sources and design rationale.
-- `PROGRESS.md`: development checkpoints.
-- `QA.md`: verification and remaining limitations.
-- `tests/core.test.js`: meaningful rule checks using Node’s built-in test runner.
-- `.github/workflows/pages.yml`: checks and deploys the static site to GitHub Pages.
+## Progress
 
-## Develop
+Preferences, chapter progress, records, and an in-progress mission are stored in this browser. The game saves at Focus checkpoints, between sectors, and periodically during combat. Save & return to setup preserves a mission. Continue saved mission restores it. Partial pathway entry restarts the current pathway; using a hint remains recorded through saving.
 
-Edit the HTML, CSS, or JavaScript and reopen/reload the page. For a local web preview, run `python -m http.server 8787` from this folder and visit `http://127.0.0.1:8787`.
+Settings provides progress export/import for moving learning data between devices. Import merges newer objective records. There is no automatic cloud synchronization. Reset learning asks before clearing it. Retained requires varied, unassisted recall on later days; a later mistake returns the concept to Practicing. Existing version 1 arcade records are preserved, and new scores are separated by version, mode, difficulty, chapter, learning level, and practice focus.
 
-For hosted updates, bump the version queries in `index.html` when changing the game scripts or stylesheet so returning players receive the new assets.
+## Source
 
-Run rule checks with `node --test tests/core.test.js`. No dependencies need to be installed. Static scenery and crowds use instancing to reduce draw calls. The low-quality option caps render resolution for slower devices. A current browser with WebGL is required.
+- `core.js`: seeded combat rules, profiles, capsule defense, checkpoint restore.
+- `curriculum.js`: 224 original concept definitions and prompts, 16 pathways, chapter references.
+- `learning.js`: 726 prompt variants, answer preparation, review selection, progress validation.
+- `game.js`: original procedural 3D models, interface, audio, input, educational encounters.
+- `index.html` and `style.css`: responsive and keyboard-accessible interface.
+- `tests/`: 25 rule, save, and learning checks.
+- `CONTENT.md`: coverage and source notes.
+- `LICENSE.md`: code, learning content, and asset notices.
 
-## Publish your own copy
+Run checks with `node --test tests/*.test.js`. A local web preview can use `python -m http.server 8787` in this folder and `http://127.0.0.1:8787`.
 
-1. Create a GitHub repository and push these files to its `main` branch.
-2. In **Settings → Pages → Build and deployment**, choose **GitHub Actions**.
-3. Run the **Check and publish Neon Swarm** workflow, or push a commit.
-
-The workflow tests the rules, packages only game assets, and deploys them. All asset paths are relative, so repository subpaths work. GitHub Pages hosts the static game; no backend or secret key is needed. See [GitHub’s official workflow guide](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
+The GitHub Pages workflow tests rules and syntax, packages only runtime assets, and deploys on pushes to main. Bump stylesheet and script version queries when publishing new assets so returning players receive the update.
 
 ## Credits
 
-All game models, interface graphics, synthesized sounds, and gameplay code are original. The 3D engine is Three.js under the MIT license; its full notice is in `vendor/THREE-LICENSE.txt`. Genre research links are in `DESIGN.md`. No third-party character models or paid generation services were used.
+Original robots, capsule, abstract cell scenery, diagrams, sounds, and gameplay. Three.js 0.160.1 is vendored under MIT; its notice is in `vendor/THREE-LICENSE.txt`.
+
+The curriculum is independently authored and aligned with [OpenStax Anatomy and Physiology 2e](https://openstax.org/books/anatomy-and-physiology-2e/pages/1-introduction). Source links appear inside learning encounters. No OpenStax logo, textbook artwork, or instructor question bank is included. This project is independent of OpenStax. Learning content is CC BY-NC-SA 4.0; see LICENSE.md.

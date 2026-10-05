@@ -4,20 +4,24 @@
   const $ = id => document.getElementById(id);
   const Core = window.SwarmCore;
   const colors = {lime:0xbcf779,mint:0x66efd1,coral:0xff8b73,violet:0xb69aff,road:0x304f59};
-  const districtNames=['THE SKYWAY','AFTER HOURS','THE REACTOR'];
-  const bossNames=['THE SCRAP KING','THE NIGHT SHIFT','CORE OVERRIDE'];
+  const districtNames=['CELL CIRCUIT','SIGNAL NETWORK','SYSTEM CORE'];
+  const bossNames=['THE DISRUPTOR','SIGNAL JAMMER','CORE IMBALANCE'];
   const labels={recruits:'RESCUE BOTS',rapid:'RAPID FIRE',spread:'SPLIT SHOT',shield:'SHIELD CELL',pierce:'RAIL BLASTER'};
   const icons={recruits:'+',rapid:'»',spread:'⋔',shield:'◇',pierce:'↟'};
   const weaponNames={pulse:'PULSE BLASTER',spread:'SPLIT BLASTER',pierce:'RAIL BLASTER'};
-  let save={records:{},settings:{sound:false,reduced:matchMedia('(prefers-reduced-motion: reduce)').matches,quality:'auto'}};
-  let storageOK=true;
-  try {const loaded=JSON.parse(localStorage.getItem('neon-swarm-v1')||'null');if(loaded){save.records=loaded.records||{};save.settings={...save.settings,...loaded.settings};}}catch{storageOK=false;}
-  function persist(){try{localStorage.setItem('neon-swarm-v1',JSON.stringify(save));}catch{storageOK=false;}}
-  let selectedMode='campaign',game=null,paused=false,modalKind=null,lastFocus=null,wasPaused=false;
+  let save={version:2,records:{},learning:{},resume:null,settings:{mode:'lesson',chapter:1,topic:'all',knowledge:'foundations',difficulty:'standard',sound:false,reduced:matchMedia('(prefers-reduced-motion: reduce)').matches,quality:'auto'}};
+  let storageOK=true,storageWarned=false;
+  try{const loaded=JSON.parse(localStorage.getItem('neon-swarm-v2')||localStorage.getItem('neon-swarm-v1')||'null');if(loaded){save.records=loaded.records||{};save.settings={...save.settings,...loaded.settings};save.learning=window.BodyguardLearning.validateProgress(loaded.learning||{});save.resume=loaded.resume||null;}}catch{storageOK=false;}
+  if(!['lesson','study','campaign','endless','daily'].includes(save.settings.mode))save.settings.mode='lesson';
+  if(!window.SwarmCore.DIFFICULTIES[save.settings.difficulty])save.settings.difficulty='standard';
+  if(!window.BodyguardCurriculum.chapters.some(c=>c.id===Number(save.settings.chapter)))save.settings.chapter=1;
+  if(!['foundations','connections','application'].includes(save.settings.knowledge))save.settings.knowledge='foundations';
+  if(!['all','Structure & identity','Function & regulation'].includes(save.settings.topic))save.settings.topic='all';
+  function persist(){try{localStorage.setItem('neon-swarm-v2',JSON.stringify(save));storageOK=true;}catch{storageOK=false;if(!storageWarned){storageWarned=true;toast('Browser saving is unavailable. Export progress in Settings before leaving.');}}}
+  let selectedMode=save.settings.mode,game=null,paused=false,modalKind=null,lastFocus=null,wasPaused=false;
   let engine=null,renderTime=0,previousTime=performance.now(),demoClock=0,hudTimer=0,simAccumulator=0;
   let announceTimeout,toastTimeout,flashTime=0,shakeTime=0,dragging=false;
-  const keys=new Set();
-  let audioCtx=null,lastShootSound=0;
+  const keys=new Set();let audioCtx=null,lastShootSound=0;
   function unlockAudio(){if(!save.settings.sound)return;try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();}catch{}}
   function tone(freq,duration=.09,type='sine',volume=.035,slide=0){
     if(!save.settings.sound||!audioCtx||audioCtx.state!=='running')return;
@@ -37,100 +41,230 @@
   function floatText(text,x,z,bad=false){
     if(!engine)return;const p=engine.project(x,2,z);const el=document.createElement('span');el.className=`float-label${bad?' bad':''}`;el.textContent=text;el.style.left=`${p.x}px`;el.style.top=`${p.y}px`;$('float-labels').appendChild(el);setTimeout(()=>el.remove(),1050);
   }
-  function recordKey(){return selectedMode==='daily'?`daily-${localDate()}`:selectedMode;}
+  const Curriculum=window.BodyguardCurriculum, Learning=window.BodyguardLearning;
+  const escapeHTML=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const modeNames={lesson:'Chapter mission',study:'Study',campaign:'Arcade',endless:'Endless',daily:'Daily'};
+  const difficultyNotes={explorer:'Generous warnings and shields. Defend every lane at a gentler pace.',standard:'Active defense, measured growth, and bosses that fight back.',veteran:'More mixed waves and less room for missed threats.',expert:'Intense waves, tighter protection, and demanding resource choices.'};
+  let activeLesson=null,sectorCheckpoint=null,focusSelection=null,focusStep=0,focusAssisted=false,focusOpened=0,checkpointTimer=0;
+  function chapter(){return Curriculum.chapters.find(c=>c.id===Number(save.settings.chapter))||Curriculum.chapters[0];}
+  function educational(){return ['lesson','study'].includes(selectedMode);}
   function localDate(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-  function refreshRecord(){const r=save.records[recordKey()];$('best-score').textContent=String(r?.score||0).padStart(6,'0');$('best-caption').textContent=r?`${r.peak} bots at peak · ${r.kills} scrap bots recycled`:(selectedMode==='daily'?`Today’s circuit · ${localDate()}`:'Your first big run awaits.');}
-  function selectMode(mode){if(game&&game.phase!=='result')return;selectedMode=mode;document.querySelectorAll('[data-mode]').forEach(b=>{const active=b.dataset.mode===mode;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});refreshRecord();$('sector-number').textContent=mode==='endless'?'ENDLESS / SECTOR 01':mode==='daily'?'DAILY / SECTOR 01':'SECTOR 01 / 03';}
-  function start(){
-    if(!engine)return;unlockAudio();closeModal(false);
-    game=new Core.Game(selectedMode,selectedMode==='daily'?Core.dateSeed():Date.now()>>>0);
-    paused=false;demoClock=0;simAccumulator=0;engine.clearDynamic();engine.theme(1);$('float-labels').replaceChildren();
-    document.body.classList.add('playing');$('attract-caption').classList.add('hidden');$('mobile-launch').classList.add('hidden');$('stage-footer').classList.add('hidden');
-    $('hud-stats').classList.remove('hidden');$('play-bottom').classList.remove('hidden');$('pause-btn').classList.remove('hidden');
-    $('start-btn').innerHTML='RUN IN PROGRESS <span>↗</span>';$('start-btn').disabled=true;
-    $('run-clock').textContent='00:00';updateHUD();announce('LET’S MAKE A SWARM','DRAG OR A / D TO STEER');tone(220,.25,'triangle',.05,360);
+  function recordKey(){return ['v2.0.0',selectedMode,save.settings.difficulty,educational()?chapter().id:'arcade',educational()?save.settings.knowledge:'',educational()?save.settings.topic:'',selectedMode==='daily'?localDate():''].join(':');}
+  function refreshRecord(){const r=save.records[recordKey()];$('best-score').textContent=String(r?.score||0).padStart(6,'0');$('best-caption').textContent=selectedMode==='study'?'Study tracks concepts, with no combat score.':r?`${r.peak} bots at peak · ${r.kills} disruptions cleared`:'Your first mission with this setup awaits.';}
+  function refreshSetup(){
+    const c=chapter(),p=Learning.chapterProgress(c.id,save.learning);
+    $('chapter-select').value=c.id;$('difficulty-select').value=save.settings.difficulty;$('knowledge-select').value=save.settings.knowledge;$('topic-select').value=save.settings.topic;
+    document.querySelectorAll('[data-mode]').forEach(b=>{b.classList.toggle('active',b.dataset.mode===selectedMode);b.setAttribute('aria-pressed',String(b.dataset.mode===selectedMode));});
+    $('chapter-settings').classList.toggle('hidden',!educational());$('combat-settings').classList.toggle('hidden',selectedMode==='study');
+    $('difficulty-note').textContent=difficultyNotes[save.settings.difficulty];
+    $('start-btn').innerHTML=`${selectedMode==='study'?'START UNTIMED PRACTICE':selectedMode==='lesson'?'START CHAPTER MISSION':'START '+modeNames[selectedMode].toUpperCase()} <span>↗</span>`;
+    $('controls-hint').textContent=selectedMode==='study'?'Select an answer. Fire to commit. Take your time.':'A / D or drag to steer · automatic shooting';
+    $('chapter-caption').textContent=`CHAPTER ${String(c.id).padStart(2,'0')} / ${Curriculum.units[c.unit-1].toUpperCase()}`;
+    $('chapter-title').textContent=educational()?c.title:'Capsule defense';$('concept-list').classList.toggle('hidden',!educational());$('chapter-description').textContent=educational()?`${c.mission}. Practice selected core concepts, then return for new forms and later review.`:'Defend the research capsule from simulation disruptions. Rescue bots and choose your upgrades.';
+    $('concept-list').innerHTML=c.concepts.map(f=>`<span class="concept-chip ${Learning.status(save.learning[f.id]).toLowerCase()}">${escapeHTML(f.term)} <small>${Learning.status(save.learning[f.id])}</small></span>`).join('');
+    $('progress-caption').textContent=educational()?`${p.sampled} / ${p.total} core concepts practiced · ${p.retained} retained · ${p.due} due for review`:'';
+    $('sector-number').textContent=educational()?`CHAPTER ${String(c.id).padStart(2,'0')} · ${modeNames[selectedMode].toUpperCase()}`:`${Core.DIFFICULTIES[save.settings.difficulty].name.toUpperCase()} / ${modeNames[selectedMode].toUpperCase()}`;
+    $('sector-name').textContent=educational()?c.mission.toUpperCase():'CAPSULE DEFENSE';$('mission-preview').textContent=educational()?c.title:'Rescue. Upgrade. Intercept.';
+    $('resume-run').classList.toggle('hidden',!save.resume);refreshRecord();
   }
-  function home(){
-    game=null;paused=false;engine?.clearDynamic();engine?.theme(1);document.body.classList.remove('playing');
-    for(const id of ['hud-stats','play-bottom','pause-btn','boss-hud'])$(id).classList.add('hidden');
-    for(const id of ['attract-caption','mobile-launch','stage-footer'])$(id).classList.remove('hidden');
-    $('start-btn').disabled=false;$('start-btn').innerHTML='LET’S MAKE A SWARM <span>↗</span>';$('wave-progress').style.width='0';$('run-clock').textContent='00:00';$('sector-name').textContent='THE SKYWAY';
-    closeModal(false);selectMode(selectedMode);refreshRecord();
+  function selectMode(mode){if(game&&game.phase!=='result')return;if(!modeNames[mode])return;selectedMode=mode;save.settings.mode=mode;refreshSetup();persist();}
+  function rememberRun(){
+    if((game&&['playing','upgrade'].includes(game.phase))||(selectedMode==='study'&&activeLesson))save.resume={version:2,mode:selectedMode,settings:{chapter:save.settings.chapter,topic:save.settings.topic,knowledge:save.settings.knowledge,difficulty:save.settings.difficulty},game:game?game.checkpoint():null,lesson:activeLesson,sectorCheckpoint};
+    persist();
+  }
+  function beginRun(reviewOnly=false){
+    if(!engine&&selectedMode!=='study'){toast('3D is unavailable. Choose Study to practice this chapter.');return;}
+    unlockAudio();closeModal(false);keys.clear();dragging=false;paused=false;simAccumulator=0;demoClock=0;engine?.clearDynamic();
+    game=selectedMode==='study'?null:new Core.Game(selectedMode,selectedMode==='daily'?Core.dateSeed():Date.now()>>>0,save.settings.difficulty);
+    activeLesson=educational()?{chapter:chapter().id,level:save.settings.knowledge,group:save.settings.topic,seed:Date.now()>>>0,deck:[],at:0,answered:0,correct:0,assisted:0,missed:[],asked:{},current:null,reviews:0}:null;
+    if(activeLesson)activeLesson.deck=Learning.buildDeck(activeLesson.chapter,activeLesson.level,activeLesson.group,activeLesson.seed,save.learning,reviewOnly);
+    sectorCheckpoint=game?game.checkpoint():null;activateRun();rememberRun();
+    if(selectedMode==='study')openFocus();else announce('DEFEND THE CAPSULE',`${Core.DIFFICULTIES[game.difficulty].name.toUpperCase()} · DRAG OR A / D TO STEER`);
+  }
+  function start(){
+    if(!educational()){beginRun();return;}
+    const c=chapter(),facts=c.concepts.filter(f=>save.settings.topic==='all'||f.group===save.settings.topic).slice(0,3);
+    showModal('briefing',`<span class="eyebrow">CHAPTER ${c.id} / ${modeNames[selectedMode].toUpperCase()}</span><h2>${escapeHTML(c.mission)}</h2><p>${escapeHTML(c.title)}</p><div class="briefing-facts">${facts.map(f=>`<div><strong>${escapeHTML(f.term)}</strong><p>${escapeHTML(f.meaning)}.</p></div>`).join('')}</div><p>During Focus checkpoints, combat freezes. Select a target, then press Fire answer. Correct recall can earn up to six bonus shield points per sector.</p><button class="primary" id="briefing-go">${selectedMode==='study'?'BEGIN PRACTICE':'DEPLOY THE SQUAD'} ↗</button><button class="secondary" id="review-go">PRACTICE MISSED & DUE CONCEPTS</button>${sourceLine(c.source)}`,false);
+    $('briefing-go').onclick=()=>beginRun();$('review-go').onclick=()=>beginRun(true);
+  }
+  function activateRun(){
+    document.querySelectorAll('.brief select,.brief [data-mode],#browse-btn').forEach(el=>el.disabled=true);document.body.classList.add('playing');document.body.classList.toggle('studying',selectedMode==='study');engine?.theme(game?.sector||1);$('float-labels').replaceChildren();
+    for(const id of ['attract-caption','stage-footer','mobile-launch'])$(id).classList.add('hidden');
+    for(const id of ['hud-stats','play-bottom','pause-btn','capsule-track'])$(id).classList.toggle('hidden',!game);
+    $('learning-hud').classList.toggle('hidden',!activeLesson);$('start-btn').disabled=true;updateHUD();
+  }
+  function home(preserve=false){
+    if(preserve)rememberRun();else{save.resume=null;persist();}
+    document.querySelectorAll('.brief select,.brief [data-mode],#browse-btn').forEach(el=>el.disabled=false);window.speechSynthesis?.cancel();game=null;activeLesson=null;sectorCheckpoint=null;paused=false;keys.clear();dragging=false;engine?.clearDynamic();document.body.classList.remove('playing','studying');
+    for(const id of ['hud-stats','play-bottom','pause-btn','boss-hud','learning-hud','capsule-track'])$(id).classList.add('hidden');
+    for(const id of ['attract-caption','stage-footer'])$(id).classList.remove('hidden');
+    $('start-btn').disabled=false;$('wave-progress').style.width='0';$('run-clock').textContent='00:00';closeModal(false);refreshSetup();
+  }
+  function resumeRun(){
+    const r=save.resume;try{
+      if(!r||r.version!==2||!modeNames[r.mode])throw Error('No compatible saved mission.');
+      selectedMode=r.mode;Object.assign(save.settings,r.settings);save.settings.mode=r.mode;game=r.game?Core.Game.restore(r.game):null;activeLesson=r.lesson;sectorCheckpoint=r.sectorCheckpoint;
+      if(educational()&&(!activeLesson||!Array.isArray(activeLesson.deck)||activeLesson.deck.length>15))throw Error('Invalid saved practice.');
+      closeModal(false);paused=false;keys.clear();dragging=false;simAccumulator=0;refreshSetup();activateRun();
+      if(activeLesson?.current)openFocus(activeLesson.current.item,true);else if(selectedMode==='study')openFocus();else if(game?.phase==='upgrade')showUpgrade();else showPause();
+    }catch(e){save.resume=null;persist();home();toast('The saved mission could not be restored. Your learning progress is still available.');}
   }
   function updateHUD(){
+    if(activeLesson)$('learning-hud').textContent=`CH ${activeLesson.chapter} · ${activeLesson.correct}/${activeLesson.answered} correct · ${activeLesson.level}`;
     if(!game)return;
-    $('squad-count').textContent=game.count;$('score-count').textContent=Math.floor(game.score).toLocaleString();$('shield-count').textContent=game.shield;
+    $('squad-count').textContent=game.count;$('score-count').textContent=Math.floor(game.score).toLocaleString();$('shield-count').textContent=game.shield;$('integrity-count').textContent=game.integrity;
+    $('capsule-progress').style.width=`${game.integrity}%`;$('capsule-track').setAttribute('aria-valuenow',String(game.integrity));$('capsule-track').classList.toggle('danger',game.integrity<30);
     $('run-clock').textContent=`${String(Math.floor(game.time/60)).padStart(2,'0')}:${String(Math.floor(game.time%60)).padStart(2,'0')}`;
-    const number=String(game.sector).padStart(2,'0');$('sector-number').textContent=selectedMode==='campaign'?`SECTOR ${number} / 03`:selectedMode==='daily'?`DAILY / SECTOR ${number} / 02`:`ENDLESS / SECTOR ${number}`;
-    $('sector-name').textContent=districtNames[(game.sector-1)%3];$('wave-progress').style.width=`${Math.min(100,game.sectorTime/44*100)}%`;
+    $('sector-number').textContent=`${Core.DIFFICULTIES[game.difficulty].name.toUpperCase()} · SECTOR ${String(game.sector).padStart(2,'0')}${selectedMode==='endless'?'':' / '+(selectedMode==='daily'?2:3)}`;
+    $('sector-name').textContent=activeLesson?chapter().mission.toUpperCase():districtNames[(game.sector-1)%3];$('wave-progress').style.width=`${Math.min(100,game.sectorTime/44*100)}%`;
     $('weapon-name').textContent=weaponNames[game.weapon];$('weapon-level').textContent=`LV. ${game.weaponLevel}${game.fireRate>1?' · RAPID':''}`;
-    const ready=game.charge>=100,btn=$('surge-btn');btn.disabled=!ready;btn.classList.toggle('ready',ready);$('surge-label').textContent=game.overdrive>0?'OVERDRIVE ACTIVE':ready?'READY · UNLEASH IT':`CHARGING · ${Math.floor(game.charge)}%`;$('surge-fill').style.transform=`scaleX(${game.charge/100})`;
-    $('boss-hud').classList.toggle('hidden',!game.boss);
-    if(game.boss){$('boss-name').textContent=bossNames[(game.sector-1)%3];const hp=Math.max(0,game.boss.hp/game.boss.maxHp*100);$('boss-health').style.width=`${hp}%`;$('boss-hp-label').textContent=`${Math.ceil(hp)}%`;}
+    const ready=game.charge>=100;$('surge-btn').disabled=!ready;$('surge-btn').classList.toggle('ready',ready);$('surge-label').textContent=game.overdrive>0?'BURST ACTIVE':ready?'READY · UNLEASH IT':`CHARGING · ${Math.floor(game.charge)}%`;$('surge-fill').style.transform=`scaleX(${game.charge/100})`;
+    $('boss-hud').classList.toggle('hidden',!game.boss);if(game.boss){$('boss-name').textContent=game.boss.exposure>0?`WEAK POINT · ${Math.ceil(game.boss.exposure)}s`:bossNames[(game.sector-1)%3];const hp=Math.max(0,game.boss.hp/game.boss.maxHp*100);$('boss-health').style.width=`${hp}%`;$('boss-hp-label').textContent=`${Math.ceil(hp)}%`;}
   }
   function handleEvents(){
     for(const e of game.drainEvents()){
-      if(e.type==='fire'){if(renderTime-lastShootSound>.13){tone(game.overdrive>0?190:135,.045,'triangle',.008,-70);lastShootSound=renderTime;}}
-      else if(e.type==='pop'){engine.particles(e.x,.8,e.z,colors.coral,e.kind==='brute'?12:5);tone(90,.045,'triangle',.007,-50);}
-      else if(e.type==='gate'){const text=e.overflow?`SQUAD MAX · +${e.overflow*30} SCORE`:e.delta>=0?`+${e.delta} BOTS`:`${e.delta} BOTS`;floatText(text,e.x,e.z,e.delta<0);engine.particles(e.x,1,e.z,e.delta<0?colors.coral:colors.mint,18);e.delta>=0?chime():tone(150,.2,'sawtooth',.03,-70);}
-      else if(e.type==='bonus'){floatText(e.text,e.x,e.z);chime();engine.particles(e.x,1,e.z,colors.mint,16);}
-      else if(e.type==='crateBreak'){engine.particles(e.x,1,e.z,colors.violet,15);tone(310,.08,'square',.02,-180);}
-      else if(e.type==='weapon'){announce(labels[e.kind],`LOADOUT UPGRADED · LEVEL ${e.level}`,'violet');chime();}
-      else if(e.type==='hurt'){if(!save.settings.reduced)shakeTime=.17;floatText(`−${e.amount}`,e.x,e.z,true);engine.particles(e.x,1,e.z,colors.coral,12);tone(90,.15,'sawtooth',.04,-50);}
-      else if(e.type==='shieldHit'){engine.particles(e.x,1,e.z,colors.mint,10);tone(650,.1,'sine',.03,-350);}
-      else if(e.type==='overdrive'){flashTime=.25;announce('OVERDRIVE','FOUR SECONDS OF BIG ENERGY','violet');engine.shockwave();tone(80,.8,'sawtooth',.045,800);}
-      else if(e.type==='boss'){announce(bossNames[(e.sector-1)%3],'DODGE THE RED TARGET LINES','coral');tone(110,.5,'triangle',.055,-40);}
-      else if(e.type==='warning'){tone(490,.14,'square',.012,-90);}
-      else if(e.type==='bossDown'){engine.particles(e.x,2,e.z,colors.coral,50);chime();}
-      else if(e.type==='upgrade'){showUpgrade();}
-      else if(e.type==='sector'){engine.theme(e.sector);announce(`SECTOR ${String(e.sector).padStart(2,'0')}`,districtNames[(e.sector-1)%3]);}
-      else if(e.type==='result'){showResult(e);}
+      if(e.type==='fire'){if(renderTime-lastShootSound>.13){tone(135,.045,'triangle',.008,-70);lastShootSound=renderTime;}}
+      else if(e.type==='pop'){engine?.particles(e.x,.8,e.z,colors.coral,e.kind==='brute'?12:5);}
+      else if(e.type==='gate'){floatText(e.delta>=0?`+${e.delta} BOTS`:`${e.delta} BOTS`,e.x,e.z,e.delta<0);e.delta>=0?chime():tone(150,.2,'sawtooth',.03,-70);}
+      else if(e.type==='bonus'){floatText(e.text,e.x,e.z);chime();}
+      else if(e.type==='crateBreak')engine?.particles(e.x,1,e.z,colors.violet,15);
+      else if(e.type==='weapon')announce(labels[e.kind],`LOADOUT · LEVEL ${e.level}`,'violet');
+      else if(e.type==='hurt'){if(!save.settings.reduced)shakeTime=.17;floatText(`−${e.amount}`,e.x,e.z,true);tone(90,.15,'sawtooth',.04,-50);}
+      else if(e.type==='leak'){floatText(`CAPSULE −${e.damage}`,e.x,e.z,true);tone(170,.1,'triangle',.025,-70);}
+      else if(e.type==='shieldHit')tone(650,.1,'sine',.03,-350);
+      else if(e.type==='overdrive'){flashTime=.25;announce('OVERDRIVE','SHORT BURST · MOVE TO SAFETY','violet');engine?.shockwave();tone(80,.4,'sawtooth',.04,500);}
+      else if(e.type==='boss')announce(bossNames[(e.sector-1)%3],'DODGE THE TARGET LINES','coral');
+      else if(e.type==='warning')tone(490,.14,'square',.012,-90);
+      else if(e.type==='bossDown')engine?.particles(e.x,2,e.z,colors.coral,40);
+      else if(e.type==='upgrade')showUpgrade();
+      else if(e.type==='sector'){engine?.theme(e.sector);announce(`SECTOR ${e.sector}`,'INTERCEPT EVERY LANE');}
+      else if(e.type==='result')showResult(e);
     }
   }
   function showModal(kind,html,pause=true){
-    if(modalKind==='settings')persist();
     if(!modalKind){lastFocus=document.activeElement;wasPaused=paused;}
-    if(pause&&game?.phase==='playing')paused=true;
-    modalKind=kind;$('modal-content').innerHTML=html;const heading=$('modal-content').querySelector('h2');if(heading)heading.id='modal-title';$('modal-backdrop').classList.remove('hidden');$('modal-close').classList.toggle('hidden',['upgrade','result','pause'].includes(kind));$('modal').focus();
+    if(pause&&game?.phase==='playing')paused=true;keys.clear();dragging=false;
+    modalKind=kind;$('modal-content').innerHTML=html;const h=$('modal-content').querySelector('h2');if(h)h.id='modal-title';$('modal-backdrop').classList.remove('hidden');$('modal-backdrop').classList.toggle('focus-mode',kind==='focus');$('modal-close').classList.toggle('hidden',['focus','upgrade','result','pause'].includes(kind));$('modal').focus();
   }
   function closeModal(resume=true){
-    if(!modalKind)return;
-    const kind=modalKind;
-    if(kind==='upgrade'&&resume)return;
-    modalKind=null;$('modal-backdrop').classList.add('hidden');
-    if(resume&&game?.phase==='playing')paused=wasPaused;
-    if(lastFocus?.isConnected)lastFocus.focus();
+    if(!modalKind)return;if(['focus','upgrade'].includes(modalKind)&&resume)return;modalKind=null;$('modal-backdrop').classList.add('hidden');$('modal-backdrop').classList.remove('focus-mode');if(resume&&game?.phase==='playing')paused=wasPaused;if(lastFocus?.isConnected)lastFocus.focus();
   }
-  function showPause(){
-    if(!game||game.phase!=='playing')return;
-    const alreadyPaused=paused;paused=true;keys.clear();dragging=false;
-    showModal('pause','<span class="eyebrow">TAKE A BREATHER</span><h2>The swarm can wait.</h2><p>Your squad is right where you left it.</p><button class="primary" id="resume-btn">BACK TO THE SKYWAY ↗</button><button class="secondary" id="pause-home">END RUN & RETURN HOME</button>');
-    wasPaused=alreadyPaused;$('resume-btn').onclick=()=>{closeModal(false);paused=false;unlockAudio();};$('pause-home').onclick=home;
+  function sourceLine(url){return `<p class="source-note">Independent practice · <a href="${url}" target="_blank" rel="noopener">Read the OpenStax chapter</a>. Access for free at <a href="${Curriculum.book}1-introduction" target="_blank" rel="noopener">Anatomy &amp; Physiology 2e</a> · learning content CC BY-NC-SA 4.0.</p>`;}
+  function diagram(item){
+    if(item.diagram==='heart')return `<figure class="anatomy-diagram"><svg viewBox="0 0 440 240" role="img" aria-label="Front-view chamber map: A upper anatomical right, B lower anatomical right, C upper anatomical left, D lower anatomical left"><text x="110" y="22">BODY RIGHT</text><text x="330" y="22">BODY LEFT</text><rect x="35" y="40" width="150" height="70" rx="22" class="right-heart"/><rect x="35" y="132" width="150" height="83" rx="22" class="right-heart"/><rect x="255" y="40" width="150" height="70" rx="22" class="left-heart"/><rect x="255" y="132" width="150" height="83" rx="22" class="left-heart"/><text x="110" y="84" class="diagram-letter">A</text><text x="110" y="183" class="diagram-letter">B</text><text x="330" y="84" class="diagram-letter">C</text><text x="330" y="183" class="diagram-letter">D</text><path d="M110 112v18m220-18v18" class="diagram-flow"/></svg><figcaption>Chamber map · schematic, not anatomical scale. Body right appears on your left. Text labels below provide the same choices.</figcaption></figure>`;
+    if(item.diagram==='kidney')return `<figure class="anatomy-diagram"><svg viewBox="0 0 480 215" role="img" aria-label="A: glomerular blood to capsular space; B: tubule to nearby blood; C: nearby blood to tubule"><rect x="18" y="26" width="205" height="54" rx="16" class="right-heart"/><rect x="257" y="26" width="205" height="54" rx="16" class="left-heart"/><rect x="18" y="146" width="205" height="54" rx="16" class="left-heart"/><rect x="257" y="146" width="205" height="54" rx="16" class="right-heart"/><text x="120" y="49"><tspan x="120">Glomerular</tspan><tspan x="120" dy="24">blood</tspan></text><text x="360" y="60">Nearby blood</text><text x="120" y="170"><tspan x="120">Capsule /</tspan><tspan x="120" dy="24">tubule</tspan></text><text x="360" y="180">Tubular fluid</text><path d="M85 84v57m245 57V84m65 0v57" class="diagram-flow"/><text x="104" y="120" class="diagram-letter">A ↓</text><text x="307" y="120" class="diagram-letter">B ↑</text><text x="423" y="120" class="diagram-letter">C ↓</text></svg><figcaption>Directional model · simplified. Each arrow is also described in the answer targets.</figcaption></figure>`;
+    if(item.kind==='balance')return `<div class="balance-visual" aria-label="Conceptual feedback gauge"><span>DEVIATION</span><div class="balance-track"><i></i><b class="balance-marker"></b></div><span>TARGET RANGE</span></div>`;
+    return '';
   }
-  function showGuide(){
-    showModal('guide','<span class="eyebrow">THE FIELD GUIDE</span><h2>More bots.<br>More boom.</h2><div class="guide-row"><span>↔</span><div><strong>Steer. We’ll do the shooting.</strong><p>Hold A / D or the arrow keys. On a phone, drag anywhere on the skyway. Your squad fires automatically.</p></div></div><div class="guide-row"><span>×2</span><div><strong>Pick a gate with your squad center.</strong><p>+ adds bots. × multiplies them. − and ÷ shrink the squad. At 60 bots, extra recruits turn into score.</p></div></div><div class="guide-row"><span>▣</span><div><strong>Aim at crates, then collect the loot.</strong><p>Break numbered crates to rescue bots, upgrade weapons, or add shields. Move into the floating pickup before it passes.</p></div></div><div class="guide-row"><span>✳</span><div><strong>Charge up. Clear the road.</strong><p>Kills charge Overdrive. Press Space or tap the purple button to clear enemies and fire faster for four seconds.</p></div></div><div class="guide-row"><span>!</span><div><strong>Keep moving during boss fights.</strong><p>Red target strips warn you before a heavy bolt arrives. Shields absorb losses; losing every bot ends the run. Press P or Escape to pause.</p></div></div><button class="primary" id="guide-done">GOT IT ↗</button>');
-    $('guide-done').onclick=()=>closeModal();
+  function checkFocus(){
+    if(!activeLesson||selectedMode!=='lesson'||paused||modalKind||game.phase!=='playing')return;
+    const stage=game.sectorTime>=32?2:game.sectorTime>=18?1:0;
+    const mark=game.boss&&game.boss.age>=6?3:stage;
+    if(!mark||activeLesson.asked[`${game.sector}-${mark}`])return;
+    // Do not skip an earlier checkpoint if the page resumes at a later time.
+    const pending=[1,2,3].find(i=>i<=mark&&!activeLesson.asked[`${game.sector}-${i}`]);
+    if(pending){
+      activeLesson.asked[`${game.sector}-${pending}`]=true;
+      if(pending===3&&game.sector===3){
+        const related=Learning.makeItems(activeLesson.chapter,activeLesson.level,activeLesson.group).filter(i=>i.kind!=='sequence'&&i.kind!=='diagram').slice(0,3);
+        activeLesson.bossChain={items:related.map((i,n)=>Learning.prepare(i,Learning.random(activeLesson.seed+700+n))),at:1,correct:0};
+        openFocus(activeLesson.bossChain.items[0]);
+      }else openFocus();
+    }
   }
-  function showSettings(){
-    showModal('settings',`<span class="eyebrow">MAKE YOURSELF COMFORTABLE</span><h2>Your skyway.</h2><div class="settings-row"><label for="sound-setting">Sound effects<small>Synthesized arcade sounds</small></label><input id="sound-setting" type="checkbox" ${save.settings.sound?'checked':''}></div><div class="settings-row"><label for="reduced-setting">Reduced effects<small>Less shake, particles, and flashes</small></label><input id="reduced-setting" type="checkbox" ${save.settings.reduced?'checked':''}></div><div class="settings-row"><label for="quality-setting">Graphics quality<small>Lower detail saves battery</small></label><select id="quality-setting"><option value="auto">Auto</option><option value="low">Low</option><option value="high">High</option></select></div><p>Records and preferences are saved on this browser.${storageOK?'':' Browser storage is unavailable, so records last for this session.'}</p><button class="primary" id="settings-done">SAVE & CLOSE ↗</button>`);
-    $('quality-setting').value=save.settings.quality;
-    $('sound-setting').onchange=e=>{save.settings.sound=e.target.checked;updateSound();unlockAudio();persist();};
-    $('reduced-setting').onchange=e=>{save.settings.reduced=e.target.checked;persist();};
-    $('quality-setting').onchange=e=>{save.settings.quality=e.target.value;engine?.resize();persist();};
-    $('settings-done').onclick=()=>{persist();closeModal();};
+  function openFocus(item=null,restoring=false){
+    if(!activeLesson)return;
+    if(!item){item=activeLesson.deck[activeLesson.at++];if(!item){if(selectedMode==='study')showStudyResult();return;}activeLesson.current={item,resolved:false};}
+    else if(!restoring)activeLesson.current={item,resolved:false};
+    paused=true;keys.clear();dragging=false;focusSelection=null;focusStep=0;focusAssisted=!!activeLesson.current.assisted;focusOpened=performance.now();
+    renderFocus();rememberRun();
+  }
+  function renderFocus(){
+    const state=activeLesson.current,item=state.item,resolved=state.resolved;
+    const title=activeLesson.bossChain?`Boss focus ${activeLesson.bossChain.at} / 3`:item.kind==='sequence'?'Build the pathway':item.kind==='diagram'?'Anatomy scanner':item.kind==='balance'?'Restore the balance':'Aim your answer';
+    const step=item.kind==='sequence'&&!resolved?`<div class="route-progress" aria-label="Completed pathway stages">${item.steps.map((s,i)=>`<span class="${i<focusStep?'complete':''}">${i<focusStep?escapeHTML(s):i+1}</span>`).join('<b>→</b>')}</div><p class="step-caption">Choose stage ${focusStep+1} of ${item.steps.length}.</p>`:'';
+    const options=item.options.filter(o=>item.kind!=='sequence'||resolved||Number(o.id)>=focusStep);
+    showModal('focus',`<span class="eyebrow">FOCUS / CHAPTER ${activeLesson.chapter} · ${activeLesson.level.toUpperCase()}</span><h2>${title}</h2><p class="focus-prompt" id="focus-prompt">${escapeHTML(item.prompt)}</p>${diagram(item)}${step}<div class="answer-targets ${resolved?'resolved':''}" role="group" aria-label="Answer targets">${options.map((o,i)=>`<button class="answer-target ${resolved&&item.kind!=='sequence'&&o.id===item.answer?'correct-answer':''} ${resolved&&o.id===state.chosen&&!state.correct?'wrong-answer':''}" data-answer="${escapeHTML(o.id)}" ${resolved?'disabled':''} aria-pressed="false"><span class="target-number">${i+1}</span><span>${escapeHTML(o.label)}</span><b aria-hidden="true">◎</b></button>`).join('')}</div>${resolved?`<div class="answer-feedback ${state.correct?'success':'retry'}" role="status"><strong>${state.correct?(state.assisted?'Correct with a hint':'Correct — concept connected'):'Let’s make that connection'}</strong><p>${escapeHTML(state.explanation)}</p>${item.kind==='sequence'?`<p class="completed-route">${item.steps.map(escapeHTML).join(' → ')}</p>`:''}<small>${state.bonus?`+${state.bonus} bonus shields. `:''}${state.correct?'':'This concept will return in another form. '}Combat and learning progress are tracked separately.</small></div><button class="primary" id="focus-continue">${selectedMode==='study'?'NEXT CONCEPT':'BACK TO THE MISSION'} ↗</button>`:`<button class="primary" id="fire-answer" disabled>SELECT A TARGET, THEN FIRE ↗</button><div class="focus-tools"><button class="secondary" id="hint-btn">SHOW A HINT</button><button class="secondary" id="read-btn">READ ALOUD</button></div><p class="hint-text hidden" id="hint-text"></p><p class="focus-instructions">No timer. Click or tap a target, then Fire answer. Keyboard: number keys select; Enter fires.</p>`}<button class="text-btn focus-save" id="focus-save">SAVE & RETURN TO SETUP ↗</button>${sourceLine(item.source)}`,false);
+    if(resolved){$('focus-continue').onclick=continueFocus;return wireFocusSave();}
+    document.querySelectorAll('[data-answer]').forEach(b=>b.onclick=()=>selectAnswer(b.dataset.answer));
+    $('fire-answer').onclick=fireAnswer;
+    $('hint-btn').onclick=()=>{focusAssisted=true;activeLesson.current.assisted=true;$('hint-text').textContent=item.hint;$('hint-text').classList.remove('hidden');$('hint-btn').disabled=true;rememberRun();};
+    $('read-btn').onclick=()=>{if(!('speechSynthesis'in window)){toast('Read-aloud is unavailable in this browser.');return;}speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(item.prompt+'. '+options.map((o,i)=>`${i+1}. ${o.label}`).join('. ')));};
+    wireFocusSave();
+  }
+  function wireFocusSave(){$('focus-save').onclick=()=>home(true);}
+  function selectAnswer(id){
+    if(modalKind!=='focus'||activeLesson.current.resolved||performance.now()-focusOpened<220)return;
+    focusSelection=id;document.querySelectorAll('[data-answer]').forEach(b=>{const on=b.dataset.answer===id;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',String(on));});$('fire-answer').disabled=false;$('fire-answer').textContent='FIRE ANSWER ↗';
+  }
+  function fireAnswer(){
+    if(focusSelection===null||activeLesson.current.resolved)return;const item=activeLesson.current.item,chosen=focusSelection;
+    if(item.kind==='sequence'&&chosen===String(focusStep)){focusStep++;chime();if(focusStep<item.steps.length){focusSelection=null;renderFocus();return;}}
+    const correct=item.kind==='sequence'?focusStep===item.steps.length:chosen===item.answer;
+    activeLesson.answered++;if(correct)activeLesson.correct++;if(focusAssisted)activeLesson.assisted++;
+    if(activeLesson.bossChain&&correct&&!focusAssisted)activeLesson.bossChain.correct++;
+    Learning.updateProgress(save.learning,item,correct,focusAssisted,Date.now(),localDate());
+    const selected=item.options.find(o=>o.id===chosen);
+    const explanation=!correct&&selected?.meaning?`You chose ${selected.term}: ${selected.meaning}. ${item.explanation}`:item.explanation;
+    const bonus=correct&&!focusAssisted&&game?game.rewardLearning():0;
+    activeLesson.current={item,resolved:true,correct,assisted:focusAssisted,chosen,explanation,bonus};
+    if(!correct){activeLesson.missed.push({concept:item.concept,topic:item.topic,explanation:item.explanation,source:item.source});queueReview(item);}
+    correct?chime():tone(160,.12,'triangle',.025,-50);renderFocus();rememberRun();updateHUD();
+  }
+  function queueReview(item){
+    if(activeLesson.bossChain||activeLesson.reviews>=3)return;
+    const other=item.level==='connections'?'foundations':'connections';
+    const variant=Learning.makeItems(item.chapter,other).find(i=>i.concept===item.concept);if(!variant)return;
+    const remaining=activeLesson.deck.length-activeLesson.at,needed=Math.max(0,2-remaining);
+    if(activeLesson.deck.length+needed+1>12)return; // Otherwise leave it due for the next session.
+    const rng=Learning.random(activeLesson.seed+activeLesson.reviews+1);
+    if(needed){const fillers=Learning.shuffle(Learning.makeItems(item.chapter,item.level,activeLesson.group).filter(i=>i.concept!==item.concept),rng).slice(0,needed);activeLesson.deck.push(...fillers.map(i=>Learning.prepare(i,rng)));}
+    activeLesson.deck.splice(activeLesson.at+2,0,Learning.prepare(variant,rng));activeLesson.reviews++;
+  }
+  function continueFocus(){
+    if(!activeLesson?.current?.resolved)return;window.speechSynthesis?.cancel();activeLesson.current=null;closeModal(false);paused=false;
+    if(activeLesson.bossChain){
+      const chain=activeLesson.bossChain;
+      if(chain.at<chain.items.length){openFocus(chain.items[chain.at++]);return;}
+      const duration=game?.exposeBoss(chain.correct)||0;activeLesson.bossChain=null;
+      if(duration)announce('WEAK POINT EXPOSED',`${duration} SECONDS · KEEP FIRING`,'violet');
+    }
+    rememberRun();
+    if(selectedMode==='study')openFocus();
+  }
+  function lessonSummary(){
+    if(!activeLesson)return '';const p=Learning.chapterProgress(activeLesson.chapter,save.learning);const missed=[...new Map(activeLesson.missed.map(x=>[x.concept,x])).values()].slice(0,3);
+    return `<div class="learning-summary"><h3>What you practiced</h3><p><strong>${activeLesson.correct} / ${activeLesson.answered}</strong> correct · ${activeLesson.assisted} hint-assisted attempts. ${p.sampled} of ${p.total} core concepts sampled; ${p.retained} retained across later practice.</p>${missed.length?'<p>Revisit these connections:</p>'+missed.map(m=>`<div class="review-note"><strong>${escapeHTML(m.topic)}</strong><p>${escapeHTML(m.explanation)}</p></div>`).join(''):'<p>Try a different learning level or return on a later day to strengthen recall.</p>'}${sourceLine(chapter().source)}</div>`;
+  }
+  function showStudyResult(){
+    save.resume=null;persist();showModal('result',`<span class="eyebrow">UNTIMED PRACTICE COMPLETE</span><h2>Connections made.</h2>${lessonSummary()}<button class="primary" id="study-again">PRACTICE MISSED & DUE CONCEPTS ↗</button><button class="secondary" id="result-home">CHOOSE ANOTHER CHAPTER</button>`,false);$('study-again').onclick=()=>beginRun(true);$('result-home').onclick=()=>home();
   }
   function showUpgrade(){
-    paused=false;
-    showModal('upgrade',`<span class="eyebrow">SECTOR ${String(game.sector).padStart(2,'0')} CLEARED</span><h2>That’s a big little win.</h2><p>Pick one upgrade for the next district.</p><div class="upgrade-options"><button class="upgrade-option" data-upgrade="recruits"><span>+12</span><div><strong>Bring backup</strong><small>Rescue 12 more shooters. Overflow becomes score.</small></div></button><button class="upgrade-option" data-upgrade="damage"><span>↟</span><div><strong>Turn it up</strong><small>Every shot hits harder. Increase your weapon level.</small></div></button><button class="upgrade-option" data-upgrade="shield"><span>◇</span><div><strong>Safety in numbers</strong><small>Gain 18 shields to absorb incoming damage.</small></div></button></div>`,false);
-    document.querySelectorAll('[data-upgrade]').forEach(b=>b.onclick=()=>{const u=b.dataset.upgrade;closeModal(false);game.nextSector(u);paused=false;unlockAudio();chime();updateHUD();});
+    rememberRun();showModal('upgrade',`<span class="eyebrow">SECTOR ${game.sector} COMPLETE</span><h2>Refit your crew.</h2><p>The capsule recovers 10 integrity when you enter the next sector.</p><div class="upgrade-options"><button class="upgrade-option" data-upgrade="recruits"><span>+3</span><div><strong>Bring backup</strong><small>Three more shooters</small></div></button><button class="upgrade-option" data-upgrade="damage"><span>↟</span><div><strong>Focused power</strong><small>A modest damage increase, capped at 1.25</small></div></button><button class="upgrade-option" data-upgrade="shield"><span>◇</span><div><strong>Repair & protect</strong><small>Six shields and 15 extra capsule integrity</small></div></button></div>`,false);
+    document.querySelectorAll('[data-upgrade]').forEach(b=>b.onclick=()=>{closeModal(false);game.nextSector(b.dataset.upgrade);sectorCheckpoint=game.checkpoint();paused=false;rememberRun();chime();updateHUD();});
   }
   function showResult(e){
-    paused=false;updateHUD();const key=recordKey(),old=save.records[key];const isBest=!old||e.score>old.score;
-    if(isBest){save.records[key]={score:Math.floor(e.score),peak:e.peak,kills:e.kills,time:Math.floor(e.time),date:localDate()};persist();}refreshRecord();
-    const title=e.won?'City reclaimed.':'Small bots. Big effort.';
-    const caption=e.won?'You took back the skyway. The scrap swarm never stood a chance.':'Your squad went down swinging. Try a different gate, grab a crate, and come back bigger.';
-    showModal('result',`<span class="eyebrow">${e.won?'MISSION COMPLETE':'RUN COMPLETE'} / ${selectedMode==='daily'?localDate():selectedMode==='endless'?'ENDLESS RUSH':'SKYWAY RUN'}</span><h2>${title}</h2><p>${caption}</p>${isBest?'<span class="new-best">↗ NEW PERSONAL BEST</span>':''}<div class="result-stats"><div><small>SCORE</small><strong>${Math.floor(e.score).toLocaleString()}</strong></div><div><small>PEAK SQUAD</small><strong>${e.peak}</strong></div><div><small>RECYCLED</small><strong>${e.kills}</strong></div></div><button class="primary" id="retry-btn">ONE MORE RUN ↗</button><button class="secondary" id="result-home">BACK TO HOME</button>`,false);
-    $('retry-btn').onclick=start;$('result-home').onclick=home;chime();
+    paused=false;save.resume=null;const key=recordKey(),old=save.records[key],best=!old||e.score>old.score;if(best)save.records[key]={score:Math.floor(e.score),peak:e.peak,kills:e.kills,time:Math.floor(e.time),date:localDate()};persist();updateHUD();refreshRecord();
+    showModal('result',`<span class="eyebrow">${e.won?'MISSION COMPLETE':'MISSION ENDED'} / ${Core.DIFFICULTIES[game.difficulty].name.toUpperCase()}</span><h2>${e.won?'System defended.':'Regroup and return.'}</h2><p>${e.won?'Your capsule made it through.':'Your '+(game.integrity===0?'capsule lost its integrity. Intercept enemies before they pass.':'squad ran out of bots. Read the warnings and keep room to move.')+' Your learning progress is saved.'}</p>${best?'<span class="new-best">NEW BEST FOR THIS SETUP ↗</span>':''}<div class="result-stats"><div><small>SCORE</small><strong>${Math.floor(e.score).toLocaleString()}</strong></div><div><small>PEAK SQUAD</small><strong>${e.peak}</strong></div><div><small>ESCAPED</small><strong>${e.leaks}</strong></div></div>${lessonSummary()}${!e.won&&sectorCheckpoint?'<button class="primary" id="retry-sector">RETRY THIS SECTOR ↗</button>':''}<button class="${e.won?'primary':'secondary'}" id="retry-btn">START A NEW RUN ↗</button>${activeLesson?'<button class="secondary" id="result-study">PRACTICE MISSED CONCEPTS IN STUDY</button>':''}<button class="secondary" id="result-home">RETURN TO SETUP</button>`,false);
+    $('retry-btn').onclick=()=>beginRun();$('result-home').onclick=()=>home();
+    if($('result-study'))$('result-study').onclick=()=>{selectedMode='study';save.settings.mode='study';beginRun(true);};
+    if($('retry-sector'))$('retry-sector').onclick=()=>{game=Core.Game.restore(sectorCheckpoint);if(activeLesson){for(const key of Object.keys(activeLesson.asked))if(key.startsWith(game.sector+'-'))delete activeLesson.asked[key];activeLesson.current=null;activeLesson.deck=Learning.buildDeck(activeLesson.chapter,activeLesson.level,activeLesson.group,Date.now()>>>0,save.learning);activeLesson.at=0;}closeModal(false);paused=false;keys.clear();dragging=false;simAccumulator=0;activateRun();rememberRun();};
+  }
+  function showPause(){
+    if(!game||game.phase!=='playing')return;paused=true;keys.clear();dragging=false;rememberRun();showModal('pause','<span class="eyebrow">TAKE A BREATHER</span><h2>The capsule can wait.</h2><p>Movement, warnings, charge, and buffs are frozen.</p><button class="primary" id="resume-btn">CONTINUE MISSION ↗</button><button class="secondary" id="pause-home">SAVE & RETURN TO SETUP</button><button class="secondary" id="end-run">END THIS RUN</button>',false);$('resume-btn').onclick=()=>{closeModal(false);paused=false;unlockAudio();};$('pause-home').onclick=()=>home(true);$('end-run').onclick=()=>home();
+  }
+  function showGuide(){showModal('guide','<span class="eyebrow">BODYGUARD FIELD GUIDE</span><h2>Defend. Discover. Remember.</h2><div class="guide-row"><span>↔</span><div><strong>Intercept the waves</strong><p>Steer with A/D, arrows, or drag. Shooting is automatic. Escaped enemies damage your capsule; losing every bot also ends the run.</p></div></div><div class="guide-row"><span>+</span><div><strong>Grow with care</strong><p>Pick gates with your squad center. Break crates and collect their loot. Recruits, weapon choices, and shields help, but growth is limited.</p></div></div><div class="guide-row"><span>◎</span><div><strong>Focus checkpoints</strong><p>Combat freezes while you read. Select one answer target, then Fire answer. Number keys select; Enter fires. A hint marks an assisted attempt. Pathways require each stage in order.</p></div></div><div class="guide-row"><span>✳</span><div><strong>Use your emergency burst</strong><p>Space or the Overdrive button clears small enemies and warning bolts, weakens heavies, and gives brief protection. It does not open crates for you.</p></div></div><div class="guide-row"><span>↗</span><div><strong>Keep learning</strong><p>Choose any of 28 chapters. Study has no combat. Progress is saved in this browser; export it in Settings to move it between devices. Retained requires varied, unassisted recall on later days.</p></div></div><button class="primary" id="guide-done">GOT IT ↗</button>');$('guide-done').onclick=()=>closeModal();}
+  function showSettings(){
+    showModal('settings',`<span class="eyebrow">MAKE YOURSELF COMFORTABLE</span><h2>Your simulation.</h2><div class="settings-row"><label for="sound-setting">Sound effects</label><input type="checkbox" id="sound-setting" ${save.settings.sound?'checked':''}></div><div class="settings-row"><label for="reduced-setting">Reduced motion</label><input type="checkbox" id="reduced-setting" ${save.settings.reduced?'checked':''}></div><div class="settings-row"><label for="quality-setting">Graphics quality</label><select id="quality-setting"><option value="auto">Auto</option><option value="low">Low</option><option value="high">High</option></select></div><p>Progress stays in this browser. Export a copy to transfer it to another device. Existing arcade records are preserved separately.</p><button class="secondary" id="export-progress">EXPORT LEARNING PROGRESS</button><label class="import-control">IMPORT LEARNING PROGRESS<input type="file" id="import-progress" accept="application/json,.json"></label><button class="secondary" id="reset-progress">RESET LEARNING PROGRESS…</button><p class="setup-note">This game practices selected core concepts; it is not a complete textbook or a medical assessment.</p><button class="primary" id="settings-done">DONE ↗</button>`);
+    $('quality-setting').value=save.settings.quality;$('sound-setting').onchange=e=>{save.settings.sound=e.target.checked;updateSound();unlockAudio();persist();};$('reduced-setting').onchange=e=>{save.settings.reduced=e.target.checked;persist();};$('quality-setting').onchange=e=>{save.settings.quality=e.target.value;engine?.resize();persist();};$('settings-done').onclick=()=>closeModal();
+    $('export-progress').onclick=()=>{const blob=new Blob([JSON.stringify({format:'bodyguard-progress',version:2,exported:localDate(),progress:save.learning},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`bodyguard-progress-${localDate()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Learning progress exported.');};
+    $('import-progress').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>1500000)throw Error('Please choose a progress file smaller than 1.5 MB.');const data=JSON.parse(await file.text());if(data.format!=='bodyguard-progress'||data.version!==2)throw Error('Choose an exported Bodyguard progress file.');const imported=Learning.validateProgress(data.progress);for(const [id,p]of Object.entries(imported))if(!save.learning[id]||p.lastSeen>save.learning[id].lastSeen)save.learning[id]=p;persist();refreshSetup();toast('Learning progress imported.');}catch(err){toast(err.message);}e.target.value='';};
+    $('reset-progress').onclick=()=>{showModal('reset','<span class="eyebrow">RESET LEARNING</span><h2>Start a fresh notebook?</h2><p>This clears learned concepts, review dates, and the saved mission, and ends any current mission. Export your progress first if you want a copy. Arcade records and settings are kept.</p><button class="primary" id="reset-confirm">RESET LEARNING PROGRESS</button><button class="secondary" id="reset-cancel">KEEP MY PROGRESS</button>');$('reset-confirm').onclick=()=>{save.learning={};home();toast('Learning progress reset.');};$('reset-cancel').onclick=showSettings;};
+  }
+  function showChapters(){
+    showModal('chapters',`<span class="eyebrow">28 CHAPTERS / SIX UNITS</span><h2>Where will you explore?</h2><div class="chapter-filters"><label>Find a topic<input type="search" id="chapter-search" placeholder="Heart, muscle, kidney…"></label><label>Unit<select id="unit-filter"><option value="all">All six units</option>${Curriculum.units.map((u,i)=>`<option value="${i+1}">${i+1}. ${u}</option>`).join('')}</select></label></div><div class="chapter-grid" id="chapter-grid"></div>`,false);
+    function fill(){const q=$('chapter-search').value.trim().toLowerCase(),unit=$('unit-filter').value;const list=Curriculum.chapters.filter(c=>(unit==='all'||String(c.unit)===unit)&&(`${c.title} ${c.mission} ${c.concepts.map(f=>f.term+' '+f.meaning).join(' ')}`).toLowerCase().includes(q));$('chapter-grid').innerHTML=list.length?list.map(c=>{const p=Learning.chapterProgress(c.id,save.learning);return `<button class="chapter-card" data-chapter="${c.id}"><small>CHAPTER ${String(c.id).padStart(2,'0')}</small><strong>${escapeHTML(c.title)}</strong><span>${escapeHTML(c.mission)} · ${p.sampled}/8 practiced</span></button>`;}).join(''):'<p>No matching chapters. Try a broader term.</p>';document.querySelectorAll('[data-chapter]').forEach(b=>b.onclick=()=>{save.settings.chapter=Number(b.dataset.chapter);persist();closeModal(false);refreshSetup();});}
+    $('chapter-search').oninput=fill;$('unit-filter').onchange=fill;fill();
   }
   function updateSound(){$('sound-btn').classList.toggle('sound-on',save.settings.sound);$('sound-btn').setAttribute('aria-label',save.settings.sound?'Mute sound':'Enable sound');}
   function surge(){if(game&&!paused&&!modalKind){unlockAudio();game.useOverdrive();}}
@@ -151,10 +285,15 @@
       this.shadowGeo=new T.CircleGeometry(1,10);this.shadows=new T.InstancedMesh(this.shadowGeo,new T.MeshBasicMaterial({color:0x071d26,transparent:true,opacity:.24,depthWrite:false}),420);this.shadows.frustumCulled=false;this.scene.add(this.shadows);
       this.squadRing=new T.Mesh(new T.RingGeometry(1.85,1.91,48),new T.MeshBasicMaterial({color:colors.mint,transparent:true,opacity:.45,side:T.DoubleSide,depthWrite:false}));this.squadRing.rotation.x=-Math.PI/2;this.squadRing.position.set(0,.035,12);this.scene.add(this.squadRing);
       this.squadTag=this.sprite('5 BOTS',colors.mint,2.6,1.1);this.scene.add(this.squadTag);this.lastCount=0;
+      this.capsule=new T.Group();this.capsule.position.set(0,0,14.8);this.scene.add(this.capsule);
+      this.box(this.capsule,0,.5,0,1.45,.65,1.65,0x3d737c);
+      const pod=new T.Mesh(new T.SphereGeometry(.72,16,10),this.mat(0xc5dfd1));pod.position.y=.86;pod.scale.set(1,.7,1.2);this.capsule.add(pod);
+      this.box(this.capsule,0,1.42,0,.12,.07,.65,colors.mint,true);this.box(this.capsule,0,1.43,0,.58,.07,.12,colors.mint,true);
+      this.capsuleTag=this.sprite('RESEARCH CAPSULE',colors.mint,3,.65);this.capsuleTag.position.set(0,2.1,14.8);this.scene.add(this.capsuleTag);
       this.resize();new ResizeObserver(()=>this.resize()).observe($('arena'));
     }
     mat(color,glow=false){const key=`${color}-${glow}`;if(!this.materials.has(key))this.materials.set(key,glow?new this.T.MeshBasicMaterial({color}):new this.T.MeshStandardMaterial({color,roughness:.75,metalness:.15}));return this.materials.get(key);}
-    theme(sector){const i=(sector-1)%3;const sky=[0x163440,0x241d36,0x17342e][i];this.scene.background.set(sky);this.scene.fog.color.set(sky);this.mat(colors.road).color.set([0x304f59,0x43384f,0x3b5c52][i]);}
+    theme(sector){const i=activeLesson?(chapter().unit-1)%3:(sector-1)%3;const sky=[0x163440,0x241d36,0x17342e][i];this.scene.background.set(sky);this.scene.fog.color.set(sky);this.mat(colors.road).color.set([0x304f59,0x43384f,0x3b5c52][i]);}
     box(group,x,y,z,sx,sy,sz,color,glow=false){const m=new this.T.Mesh(this.unitCube,this.mat(color,glow));m.position.set(x,y,z);m.scale.set(sx,sy,sz);group.add(m);return m;}
     buildWorld(){
       const T=this.T;this.box(this.world,0,-.27,-26,10,.45,110,colors.road);
@@ -172,14 +311,11 @@
         this.panels.push(this.box(this.world,0,.008,z,9.4,.007,.025,0x4e7276));
       }
       const cityRng=Core.random(77221);
-      for(const side of [-1,1])for(let i=0;i<44;i++){
-        const x=side*(8+cityRng()*30),z=16-cityRng()*100,h=2+cityRng()*18,w=1.6+cityRng()*3;
-        const group=new T.Group();group.position.set(x,-10,z);this.world.add(group);
-        const c=[0x1a303d,0x1b3c48,0x294653][i%3];this.box(group,0,h/2,0,w,h,2+cityRng()*2,c);
-        this.box(group,0,h+.15,0,w+.12,.2,2.2,0x466270);
-        if(i%3===0)this.box(group,side*(-w/2-.025),h*.65,0,.05,h*.33,.45,i%2?colors.coral:colors.mint,true);
-        for(let j=0;j<Math.floor(h/1.8);j++)for(let k=0;k<2;k++)if(cityRng()>.22)this.box(group,(k-.5)*w*.52,1.2+j*1.7,1.13,.2,.35,.03,j%3?0x82b0a5:0xdaa48b,true);
-        this.city.push(group);
+      for(const side of [-1,1])for(let i=0;i<12;i++){
+        const x=side*(8+cityRng()*17),z=12-cityRng()*95,r=1.2+cityRng()*2.2;
+        const cell=new T.Mesh(new T.SphereGeometry(r,12,8),new T.MeshStandardMaterial({color:i%2?0x285f68:0x374f76,roughness:.65,transparent:true,opacity:.6}));cell.position.set(x,-2+cityRng()*8,z);this.world.add(cell);
+        const nucleus=new T.Mesh(new T.SphereGeometry(r*.32,10,8),this.mat(i%2?colors.mint:colors.violet,true));nucleus.position.copy(cell.position);this.world.add(nucleus);
+        this.box(this.world,x,-5,z,.18,5,1,0x304f65);this.box(this.world,x,-2.5,z,4,.14,.16,i%2?colors.mint:colors.violet,true);
       }
       const floor=new T.Mesh(new T.PlaneGeometry(200,200),this.mat(0x152b37));floor.rotation.x=-Math.PI/2;floor.position.y=-11;this.world.add(floor);
       const moon=new T.Mesh(new T.SphereGeometry(4.5,32,20),this.mat(0xb9d9c3,true));moon.position.set(-17,17,-75);this.scene.add(moon);
@@ -296,6 +432,7 @@
     project(x,y,z){const p=new this.T.Vector3(x,y,z).project(this.camera);return {x:(p.x+1)/2*this.w,y:(1-p.y)/2*this.h};}
     pointerX(clientX){const rect=this.renderer.domElement.getBoundingClientRect();const left=this.project(-4.5,0,Core.PLAYER_Z).x,right=this.project(4.5,0,Core.PLAYER_Z).x;return Core.clamp(((clientX-rect.left-left)/(right-left)-.5)*9,-3.7,3.7);}
     render(state,t,dt,attract=false){
+      this.capsule.visible=!attract;this.capsuleTag.visible=!attract;
       const poses=Core.formation(state.count,state.x),enemyList=state.enemies;
       this.updateRobots(this.friends,poses,t);this.updateRobots(this.enemies,enemyList,t);
       const d=this.dummy;this.shots.count=Math.min(state.shots.length,720);
@@ -322,10 +459,9 @@
   }
   function demoState(t){
     const count=18,x=Math.sin(t*.3)*1.15,enemies=[];
-    for(let i=0;i<22;i++){const z=-41+((t*4.2+i*2.3)%45);enemies.push({id:i,x:(i%7-3)*1.06,z,kind:i%9===0?'brute':'walker'});}
+    for(let i=0;i<16;i++)enemies.push({id:i,x:(i%7-3)*1.06,z:-41+((t*4.2+i*2.3)%45),kind:i%9===0?'brute':'walker'});
     const shots=[];for(let i=0;i<50;i++)shots.push({x:x+(i%6-2.5)*.55,z:12-((t*25+i*1.2)%52),dx:0});
-    const z=-29+((t*3)%23);
-    return{count,x,enemies,shots,gates:[{id:9001,z,offset:0,left:{op:'×',value:2},right:{op:'+',value:8}}],crates:[{id:9002,x:-2.8,z:-9,kind:'recruits',amount:8,hp:12,maxHp:12}],pickups:[],hazards:[],boss:null,speed:4,overdrive:0};
+    return{count,x,enemies,shots,gates:[{id:9001,z:-29+((t*3)%23),offset:0,left:{op:'+',value:4},right:{op:'+',value:2}}],crates:[],pickups:[],hazards:[],boss:null,speed:4,overdrive:0};
   }
   function frame(now){
     const elapsed=Math.min(.1,Math.max(0,(now-previousTime)/1000)),dt=Math.min(.04,elapsed);previousTime=now;
@@ -336,37 +472,43 @@
           const move=(keys.has('arrowright')||keys.has('d')?1:0)-(keys.has('arrowleft')||keys.has('a')?1:0);
           if(move)game.steer(game.targetX+move*dt*6.2);
           simAccumulator+=elapsed;
-          while(simAccumulator>=1/60&&game.phase==='playing'&&!paused){game.update(1/60);handleEvents();simAccumulator-=1/60;}
+          while(simAccumulator>=1/60&&game.phase==='playing'&&!paused){game.update(1/60);handleEvents();checkFocus();simAccumulator-=1/60;}
           if(game.phase!=='playing'||paused)simAccumulator=0;
+          checkpointTimer+=dt;if(checkpointTimer>5){rememberRun();checkpointTimer=0;}
         }
-        engine?.render(game,renderTime,paused?0:dt);
-        hudTimer+=dt;if(hudTimer>.1){updateHUD();hudTimer=0;}
-      }else{demoClock+=dt;engine?.render(demoState(demoClock),renderTime,dt,true);}
+        engine?.render(game,renderTime,paused?0:dt);hudTimer+=dt;if(hudTimer>.1){updateHUD();hudTimer=0;}
+      }else{if(!paused)demoClock+=dt;engine?.render(demoState(demoClock),renderTime,paused?0:dt,true);}
       flashTime=Math.max(0,flashTime-dt);shakeTime=Math.max(0,shakeTime-dt);
     }
     requestAnimationFrame(frame);
   }
-  function showError(text){$('error-text').textContent=text;$('error-panel').classList.remove('hidden');$('start-btn').disabled=true;$('mobile-start').disabled=true;}
+  function showError(text){$('error-text').textContent=text+' Study mode remains available.';$('error-panel').classList.remove('hidden');}
   function wire(){
+    $('chapter-select').innerHTML=Curriculum.chapters.map(c=>`<option value="${c.id}">${String(c.id).padStart(2,'0')} · ${escapeHTML(c.title)}</option>`).join('');
     document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>selectMode(b.dataset.mode));
-    $('start-btn').onclick=start;$('mobile-start').onclick=start;$('help-btn').onclick=showGuide;$('field-guide-btn').onclick=showGuide;$('settings-btn').onclick=showSettings;$('pause-btn').onclick=showPause;$('surge-btn').onclick=surge;
+    for(const [id,key]of [['chapter-select','chapter'],['topic-select','topic'],['difficulty-select','difficulty'],['knowledge-select','knowledge']])$(id).onchange=e=>{save.settings[key]=key==='chapter'?Number(e.target.value):e.target.value;persist();refreshSetup();};
+    $('start-btn').onclick=start;$('mobile-start').onclick=start;$('resume-run').onclick=resumeRun;$('browse-btn').onclick=showChapters;
+    $('help-btn').onclick=showGuide;$('field-guide-btn').onclick=showGuide;$('settings-btn').onclick=showSettings;$('pause-btn').onclick=showPause;$('surge-btn').onclick=surge;$('error-study').onclick=()=>{home();selectMode('study');start();};
     $('sound-btn').onclick=()=>{save.settings.sound=!save.settings.sound;updateSound();unlockAudio();persist();if(save.settings.sound)chime();};
     $('fullscreen-btn').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{toast('Fullscreen is unavailable in this browser.');}};
-    $('modal-close').onclick=()=>closeModal();$('modal-backdrop').onclick=e=>{if(e.target===$('modal-backdrop')&&!['upgrade','result','pause'].includes(modalKind))closeModal();};
+    $('modal-close').onclick=()=>closeModal();$('modal-backdrop').onclick=e=>{if(e.target===$('modal-backdrop')&&!['focus','upgrade','result','pause'].includes(modalKind))closeModal();};
     document.addEventListener('keydown',e=>{
-      if(modalKind){if(e.key==='Tab'){const items=[...$('modal').querySelectorAll('button:not(.hidden),input,select,a')].filter(x=>!x.disabled);if(items.length){const first=items[0],last=items[items.length-1];if(e.shiftKey&&(document.activeElement===first||document.activeElement===$('modal'))){e.preventDefault();last.focus();}else if(!e.shiftKey&&(document.activeElement===last||document.activeElement===$('modal'))){e.preventDefault();first.focus();}}}if(e.key==='Escape'){if(modalKind==='pause')$('resume-btn').click();else if(!['upgrade','result'].includes(modalKind))closeModal();}return;}
+      if(modalKind){
+        if(e.key==='Tab'){const items=[...$('modal').querySelectorAll('button,input,select,a')].filter(x=>!x.disabled&&x.getClientRects().length);if(items.length){const first=items[0],last=items[items.length-1];if(e.shiftKey&&(document.activeElement===first||document.activeElement===$('modal'))){e.preventDefault();last.focus();}else if(!e.shiftKey&&(document.activeElement===last||document.activeElement===$('modal'))){e.preventDefault();first.focus();}}}
+        if(modalKind==='focus'&&!e.repeat){if(/^[1-6]$/.test(e.key)){e.preventDefault();const b=[...document.querySelectorAll('[data-answer]')][Number(e.key)-1];if(b&&!b.disabled)selectAnswer(b.dataset.answer);}if(e.key==='Enter'){e.preventDefault();if(activeLesson.current.resolved)continueFocus();else fireAnswer();}}
+        if(e.key==='Escape'){if(modalKind==='pause')$('resume-btn').click();else if(!['focus','upgrade','result'].includes(modalKind))closeModal();}return;
+      }
+      if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName))return;
       if(['ArrowLeft','ArrowRight',' ','a','d','A','D'].includes(e.key)&&game){e.preventDefault();keys.add(e.key.toLowerCase());}
-      if(e.repeat)return;
-      if(e.key===' ')surge();if((e.key.toLowerCase()==='p'||e.key==='Escape')&&game?.phase==='playing')showPause();
+      if(e.repeat)return;if(e.key===' ')surge();if((e.key.toLowerCase()==='p'||e.key==='Escape')&&game?.phase==='playing')showPause();
     });
     document.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
     const canvas=engine?.renderer.domElement;
-    if(canvas){canvas.addEventListener('pointerdown',e=>{if(!game||paused||game.phase!=='playing'||modalKind)return;dragging=true;canvas.setPointerCapture(e.pointerId);game.steer(engine.pointerX(e.clientX));unlockAudio();});canvas.addEventListener('pointermove',e=>{if(dragging&&game&&!paused)game.steer(engine.pointerX(e.clientX));});canvas.addEventListener('pointerup',()=>dragging=false);canvas.addEventListener('pointercancel',()=>dragging=false);canvas.addEventListener('lostpointercapture',()=>dragging=false);}
-    function focusLost(){keys.clear();dragging=false;if(game?.phase==='playing'&&!paused&&!modalKind)showPause();}
-    document.addEventListener('visibilitychange',()=>{if(document.hidden)focusLost();previousTime=performance.now();});window.addEventListener('blur',focusLost);
+    if(canvas){canvas.addEventListener('pointerdown',e=>{if(!game||paused||game.phase!=='playing'||modalKind)return;dragging=true;canvas.setPointerCapture(e.pointerId);game.steer(engine.pointerX(e.clientX));unlockAudio();});canvas.addEventListener('pointermove',e=>{if(dragging&&game&&!paused&&!modalKind)game.steer(engine.pointerX(e.clientX));});for(const type of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(type,()=>dragging=false);}
+    function focusLost(){keys.clear();dragging=false;window.speechSynthesis?.cancel();if(game?.phase==='playing'&&!paused&&!modalKind)showPause();}
+    document.addEventListener('visibilitychange',()=>{if(document.hidden){rememberRun();focusLost();}previousTime=performance.now();});window.addEventListener('blur',focusLost);window.addEventListener('pagehide',rememberRun);
   }
   try{engine=new Scene();}catch(e){console.error(e);showError(e.message);}
-  wire();updateSound();refreshRecord();if(engine)requestAnimationFrame(frame);
-  // A read-only snapshot helps reproduce issues without exposing or mutating the run.
-  window.NeonSwarm={snapshot:()=>game?{...game.snapshot(),paused}:({phase:'menu',mode:selectedMode,storage:storageOK}),version:'1.0.2'};
+  wire();updateSound();refreshSetup();if(engine)requestAnimationFrame(frame);
+  window.NeonSwarm={snapshot:()=>game?{...game.snapshot(),paused,modal:modalKind,learning:activeLesson?{chapter:activeLesson.chapter,level:activeLesson.level,answered:activeLesson.answered,correct:activeLesson.correct}:null}:({phase:activeLesson?'study':'menu',mode:selectedMode,modal:modalKind,storage:storageOK,learning:activeLesson?{chapter:activeLesson.chapter,answered:activeLesson.answered,correct:activeLesson.correct}:null}),version:'2.0.0'};
 })();

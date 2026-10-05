@@ -1,0 +1,158 @@
+{
+  "version": "2.0.0",
+  "method": "30 campaign seeds per policy and difficulty; 60Hz, 360-second cutoff; automatic sector upgrade (4 recruits below 22 bots, otherwise damage or repairs below 45 integrity). Simulations detect exploits and pacing; they do not predict human win rates.",
+  "profiles": {
+    "explorer": {
+      "stationaryCenter": {
+        "runs": 30,
+        "wins": 0,
+        "timeouts": 0,
+        "medianTime": 58.92,
+        "medianIntegrity": 26,
+        "medianBossSeconds": null,
+        "reachedCap": 0
+      },
+      "stationaryRight": {
+        "runs": 30,
+        "wins": 0,
+        "timeouts": 0,
+        "medianTime": 55.98,
+        "medianIntegrity": 0,
+        "medianBossSeconds": null,
+        "reachedCap": 0
+      },
+      "reactive": {
+        "runs": 30,
+        "wins": 29,
+        "timeouts": 0,
+        "medianTime": 216.33,
+        "medianIntegrity": 90,
+        "medianBossSeconds": 23.92,
+        "reachedCap": 0
+      },
+      "interceptor": {
+        "runs": 30,
+        "wins": 29,
+        "timeouts": 0,
+        "medianTime": 208.43,
+        "medianIntegrity": 100,
+        "medianBossSeconds": 22.97,
+        "reachedCap": 0
+      }
+    },
+    "standard": {
+      "stationaryCenter": {
+        "runs": 30,
+        "wins": 0,
+        "timeouts": 0,
+        "medianTime": 53.08,
+        "medianIntegrity": 30,
+        "medianBossSeconds": null,
+        "reachedCap": 0
+      },
+      "stationaryRight": {
+        "runs": 30,
+        "wins": 0,
+        "timeouts": 0,
+        "medianTime": 51.03,
+        "medianIntegrity": 0,
+        "medianBossSeconds": null,
+        "reachedCap": 0
+      },
+      "reactive": {
+        "runs": 30,
+        "wins": 20,
+        "timeouts": 0,
+        "medianTime": 211.32,
+        "medianIntegrity": 73,
+        "medianBossSeconds": 26.53,
+        "reachedCap": 0
+      },
+      "interceptor": {
+        "runs": 30,
+        "wins": 26,
+        "timeouts": 0,
+        "medianTime": 212.88,
+        "medianIntegrity": 100,
+        "medianBossSeconds": 26.27,
+        "reachedCap": 0
+      }
+    },
+    "veteran": {
+      "stationaryCenter": {
+        "runs": 30,
+        "wins": 0,
+        "timeouts": 0,
+        "medianTime": 50.97,
+        "medianIntegrity": 4,
+        "medianBossSeconds": null,
+        "reachedCap": 0
+      },
+      "stationaryRight": {
+        "runs": 30,
+        "wins": 0,
+        "timeouts": 0,
+        "medianTime": 48.83,
+        "medianIntegrity": 0,
+        "medianBossSeconds": null,
+        "reachedCap": 0
+      },
+      "reactive": {
+        "runs": 30,
+        "wins": 9,
+        "timeouts": 0,
+        "medianTime": 88.47,
+        "medianIntegrity": 39,
+        "medianBossSeconds": 27.85,
+        "reachedCap": 0
+      },
+      "interceptor": {
+        "runs": 30,
+        "wins": 12,
+        "timeouts": 0,
+        "medianTime": 169.07,
+        "medianIntegrity": 32,
+        "medianBossSeconds": 33.12,
+        "reachedCap": 0
+      }
+    },
+    "expert": {
+      "stationaryCenter": {
+        "runs": 30,
+        "wins": 0,
+        "timeouts": 0,
+        "medianTime": 48.72,
+        "medianIntegrity": 4,
+        "medianBossSeconds": null,
+        "reachedCap": 0
+      },
+      "stationaryRight": {
+        "runs": 30,
+        "wins": 0,
+        "timeouts": 0,
+        "medianTime": 49.9,
+        "medianIntegrity": 0,
+        "medianBossSeconds": null,
+        "reachedCap": 0
+      },
+      "reactive": {
+        "runs": 30,
+        "wins": 6,
+        "timeouts": 0,
+        "medianTime": 78.42,
+        "medianIntegrity": 24,
+        "medianBossSeconds": 34.98,
+        "reachedCap": 0
+      },
+      "interceptor": {
+        "runs": 30,
+        "wins": 6,
+        "timeouts": 0,
+        "medianTime": 78.43,
+        "medianIntegrity": 76,
+        "medianBossSeconds": 35.02,
+        "reachedCap": 0
+      }
+    }
+  }
+}
