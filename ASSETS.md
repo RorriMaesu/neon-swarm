@@ -1,26 +1,42 @@
-# Animated character assets — 2.2
+# Animated character assets — 2.4
 
-This release uses real mesh assets and authored skeletal animations from [Quaternius Ultimate Space Kit](https://quaternius.com/packs/ultimatespacekit.html), released March 2023 under [CC0](https://creativecommons.org/publicdomain/zero/1.0/). Source GLTF files include embedded atlas textures and animation clips. They are preserved in `assets/characters/sources/`; optimized standard GLB exports can be opened in Blender.
+The squad and armored pursuers use two original textured robots generated with Hyper3D Rodin. The mint and ivory **rescue guardian** has amber eyes and a teal chest emblem. The coral and plum **armored stalker** has angular armor and bright eyes. Local Blender 4.5.1 supplies their 17-bone skeletons and authored running loops.
 
-| Game role | Original model | Runtime motion | Optimized triangles |
-|---|---|---|---|
-| Repair squad | Mech_RaeTheRedPanda | Run | 1,715 |
-| Swarm drone | Enemy_Small | Fast_Flying | 1,936 |
-| Runner, armored stalker, boss | Enemy_Large | Run | 2,642 |
-| Ranged spitter | Enemy_Flying | Fast_Flying | 2,730 |
+[Meet the squad](character-gallery.html) lets you rotate the characters, pause motion, inspect a 150-pursuer crowd drill, and download animated GLBs. It also works offline from the Desktop folder.
 
-Models are scaled to gameplay footprints and tinted by role. Brutes and bosses use a larger stalker silhouette; spitters have a purple tint. Original rigged exports retain the other authored clips for future attack, reaction, and death transitions. The present game loops locomotion; firing and defeat are shown through projectile and particle effects.
+| Game role | Source | Motion | Triangles | Runtime vertices |
+|---|---|---|---|---|
+| Player and recruited squad | Rodin rescue guardian | Run · 24 poses | 2,700 | 2,964 |
+| Runner, armored stalker and boss | Rodin armored stalker | Run · 24 poses | 2,700 | 2,953 |
+| Swarm drone | Quaternius Enemy_Small | Fast_Flying · 16 poses | 1,936 | 1,477 |
+| Ranged spitter | Quaternius Enemy_Flying | Fast_Flying · 16 poses | 2,730 | 2,253 |
 
-Local Blender 4.5.1 reduces selected models and samples 16 poses of each locomotion clip. `tools/bake_characters.py` recreates the runtime data from the included source files. The browser interpolates position and normal textures, with an independent phase for each character. All squad members share one character draw; enemies share draws by role. Up to 360 enemies can exist; distant entities outside the road view are omitted from character drawing. No online model service, external model loader, or sign-in is needed to play, including the Desktop copy.
+## Rodin production and provenance
 
-## Meshy production brief
+The user authorized the 7 credits available on October 5, 2026. Three confirmations used **1.5 credits total**, leaving **5.5 credits** at the last observed balance. No subscription or credit purchase was made.
 
-Meshy supports rigging humanoids and exporting animated GLB, as documented in its [Rigging API](https://docs.meshy.ai/en/api/rigging) and [Animation API](https://docs.meshy.ai/en/api/animation). Access requires a signed-in workspace or an authorized API key and sufficient credits. At this checkpoint, the Meshy workspace is signed in but shows 0 credits, and the user has not yet supplied a generation credit limit; **no Meshy generation or credit spending has occurred**.
+The first Gen-2.5 guardian produced a complete preview but required a subscription for download. Production used the supported **Gen-1.5 Zero** export workflow for both final characters. The original PBR GLB, shaded GLB and emissive map are retained under `assets/characters/rodin/guardian-original/` and `stalker-original/`. References, prompts, job URLs, SHA-256 hashes and costs are recorded in [RODIN-ASSET-PLAN.md](RODIN-ASSET-PLAN.md) and `assets/characters/rodin-ledger.json`.
 
-Start with two humanoids, rather than spending credits on every swarm creature. Use smart topology, a clear silhouette, separated limbs in an A-pose, and a target of 1,500–3,000 triangles after optimization. Export a rigged GLB with an in-place run/walk clip. Normalize height and orientation with Blender, then bake into the same crowd format. Keep service credentials outside this public repository. Verify the license shown by the workspace before distributing a generated asset and retain its attribution if required.
+These are Rodin-generated project assets, subject to [Hyper3D's output terms](https://hyper3d.ai/legal/terms), section 5(b), and applicable third-party rights. They are not the CC0 Quaternius assets. The ordinary permitted download controls supplied both meshes; no subscription restriction was bypassed.
 
-**Repair guardian:** Stylized tall humanoid science-fiction rescue android, mint and ivory armor, navy joints, rounded visor with warm amber eyes, compact forearm pulse blaster, small medical cross on chest, sturdy readable boots, distinct separate fingers and limbs, friendly confident silhouette, clean game-ready low-poly surfaces, fully textured, symmetrical A-pose, no environment or ground platform, no floating accessories. Readable from an elevated camera.
+Rodin's [animation workflow](https://hyper3d.ai/use-cases/animation) supplies meshes ready for rigging. The final downloads were static 60,000-triangle meshes. Blender welds UV-boundary duplicates before reducing each to 2,700 triangles, retains per-corner UVs, attaches a biped with blended joint weights, and authors opposite arm/leg motion, knee bends, hip movement and chest counter-rotation. Reproduction:
 
-**Armored cell stalker:** Tall imposing humanoid synthetic invader, coral and deep-plum segmented armor, pale luminous eyes, exaggerated shoulder plates and angular head, visibly distinct articulated limbs and large feet, claw-like mechanical hands, no weapon held across the torso, clean low-poly game character, fully textured symmetrical A-pose, no background or base. Readable from an elevated camera. Reuse at larger scale with amber accents for the boss.
+```
+blender --background --python tools/rig_rodin.py -- medic
+blender --background --python tools/rig_rodin.py -- stalker
+blender --background --python tools/bake_rodin.py
+```
 
-A generated character must pass the same animated-deformation, topology, browser-rendering, offline, and crowd-budget checks as the present assets before it replaces them.
+The rigging commands save editable `.blend` files alongside the originals. The baker preserves the flying creatures, updates `medic.glb` and `stalker.glb`, and samples 24 running poses into the runtime data. Standard GLBs retain the skeleton and Run action. Attack and death clips are not authored for the new robots yet; projectiles and particles represent those events.
+
+## Browser and mobile rendering
+
+Shared 1,024-pixel base-color atlases preserve faces and armor detail. Atlases and UVs are embedded in `character-data.js`, keeping direct-file play self-contained. Position and normal textures interpolate motion with independent phases per character.
+
+Squad members share one animated draw; enemies share draws by role, retaining at most five character draws. Up to 360 enemies can exist; entities outside the road view are omitted from character drawing. No online model loader, generation service, sign-in or API key is needed to play. Low graphics quality reduces pixel density. Desktop browser checks do not establish physical-phone frame rates.
+
+## Quaternius assets
+
+Flying creatures come from [Quaternius Ultimate Space Kit](https://quaternius.com/packs/ultimatespacekit.html), released March 2023 under [CC0](https://creativecommons.org/publicdomain/zero/1.0/). Original GLTF files with textures and clips remain in `assets/characters/sources/`, including the previous mech and large-enemy models. `tools/bake_characters.py` recreates the earlier CC0 bake; run the Rodin steps afterward to restore this release's humanoids.
+
+Meshy was investigated earlier but its signed-in workspace showed no credits. No Meshy generation occurred.

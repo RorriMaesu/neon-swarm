@@ -1,0 +1,122 @@
+{
+  "service": "Hyper3D Rodin",
+  "date": "2026-10-05",
+  "startingCredits": 7,
+  "authorizedScope": "Use existing available credits for Neon Swarm character assets; no purchase or subscription",
+  "generationControlCredits": 0.5,
+  "creditsConfirmed": 1.5,
+  "remainingCreditsLastObserved": 5.5,
+  "assets": [
+    {
+      "id": "guardian",
+      "jobUrl": "https://hyper3d.ai/workspace/rodin/f24f391c-3c47-4037-a7c7-d3390a8ae9a6",
+      "reference": "rodin/guardian-reference.jpg",
+      "status": "Downloaded through Gen-1.5 Zero; Blender biped Run animation installed",
+      "requestedTriangles": 30000,
+      "geometryEffort": "High",
+      "materialEffort": "High",
+      "requestedFormat": "GLB",
+      "creditEvents": [
+        {
+          "step": "Start high-effort generation",
+          "balanceBefore": 7,
+          "balanceAfter": 6.5,
+          "credits": 0.5
+        },
+        {
+          "step": "Geometry confirmation",
+          "buttonCredits": 0.5,
+          "balanceAfterLastObserved": 6.5,
+          "note": "No additional balance decrease observed at this stage"
+        },
+        {
+          "step": "Gen-1.5 geometry confirmation",
+          "balanceBefore": 6,
+          "balanceAfter": 5.5,
+          "credits": 0.5
+        }
+      ],
+      "legacyJobUrl": "https://hyper3d.ai/workspace/rodin/f24f391c-3c47-4037-a7c7-d3390a8ae9a6",
+      "previewJobUrl": "https://hyper3d.ai/workspace/rodin/ca6e7649-137e-449b-bbc7-0be4ab71b726",
+      "downloadedTriangles": 60000,
+      "runtimeTriangles": 2700,
+      "bones": 17,
+      "runtimePoses": 24,
+      "runtimeTextureSize": [
+        1024,
+        1024
+      ],
+      "originalFiles": [
+        {
+          "path": "assets/characters/rodin/guardian-original/base_basic_pbr.glb",
+          "bytes": 10944060,
+          "sha256": "e769c308e52bc15ce2d2f5160625dd65311e45de28244dcdb3dc198b84d2c926"
+        },
+        {
+          "path": "assets/characters/rodin/guardian-original/base_basic_shaded.glb",
+          "bytes": 5751448,
+          "sha256": "933127276562ea1242867ca43576d1725815fbee1dff34f45be8633b4f0a0c0d"
+        },
+        {
+          "path": "assets/characters/rodin/guardian-original/texture_emissive.png",
+          "bytes": 85025,
+          "sha256": "7b4f4af5ac7d35836987ad6597177d4511dbf6a441871ec60825815c6feeae5e"
+        }
+      ],
+      "animatedExport": {
+        "path": "assets/characters/medic.glb",
+        "bytes": 5701720,
+        "sha256": "ce962b061f98bcf63ca42365527573b554c35e46eb324e1298660584e441c46d"
+      }
+    },
+    {
+      "id": "stalker",
+      "jobUrl": "https://hyper3d.ai/workspace/rodin/22421bdf-efc6-41a0-8814-ad1006cdc538",
+      "reference": "rodin/stalker-reference.jpg",
+      "status": "Downloaded through Gen-1.5 Zero; Blender biped Run animation installed",
+      "generationPreviewCredits": 0,
+      "geometryConfirmationButtonCredits": 0.5,
+      "requestedFormat": "GLB",
+      "creditEvents": [
+        {
+          "step": "Gen-1.5 geometry confirmation",
+          "balanceBefore": 6.5,
+          "balanceAfter": 6,
+          "credits": 0.5
+        }
+      ],
+      "downloadedTriangles": 60000,
+      "runtimeTriangles": 2700,
+      "bones": 17,
+      "runtimePoses": 24,
+      "runtimeTextureSize": [
+        1024,
+        1024
+      ],
+      "originalFiles": [
+        {
+          "path": "assets/characters/rodin/stalker-original/base_basic_pbr.glb",
+          "bytes": 11412688,
+          "sha256": "9b732bdcf7f5224283653e9237d4550b6e4cbda3f65b33b286354c707e8ab58d"
+        },
+        {
+          "path": "assets/characters/rodin/stalker-original/base_basic_shaded.glb",
+          "bytes": 5949984,
+          "sha256": "2f3df8f28f649fe78810bdd6802b8935d2592d029d0d303f027721213c06f4d5"
+        },
+        {
+          "path": "assets/characters/rodin/stalker-original/texture_emissive.png",
+          "bytes": 39186,
+          "sha256": "b4e7ea968118f12c1dc261b86f744619ea5bc6226b717ed71f5148bc11616616"
+        }
+      ],
+      "animatedExport": {
+        "path": "assets/characters/stalker.glb",
+        "bytes": 6289576,
+        "sha256": "3a5d894b9ec21dbddd8d68b9ca60a764912b0e277824c9c71b2164645cd6eb79"
+      }
+    }
+  ],
+  "outcome": "Both Gen-1.5 Zero models downloaded, rigged, animated and installed",
+  "materialConfirmationAndExport": "No additional balance decrease observed; final wallet stayed at 5.5"
+}

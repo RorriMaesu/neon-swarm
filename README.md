@@ -10,7 +10,7 @@ For the Desktop copy, double-click **Play Neon Swarm.cmd** or open **index.html*
 
 Choose Chapter mission, Study, Arcade, Endless, or Daily. Study has no combat and remains usable when WebGL is unavailable. Any of the 28 chapters can be selected immediately. Section practice includes 10,296 source-linked questions across all 169 numbered sections and 28 introductions. Explore section coverage lists objectives, topics, counts, and your progress. Study offers 20, 40, or the full set; chapter missions sample a short set. See COVERAGE.md for the scope and review limits.
 
-Detailed animated characters replace the original primitive figures. Four CC0 Quaternius characters include running mechs, flying swarm drones, armored stalkers, spitters, and a scaled animated boss. The game shares animation textures across the crowd to keep drawing costs bounded. See ASSETS.md for source models, Blender processing, and the Meshy replacement plan.
+Two custom Rodin robots now lead the game: a mint and ivory rescue guardian and a coral and plum armored stalker, both textured, rigged and animated in local Blender. Quaternius flying drones and spitters complete the swarm. Shared animation textures keep crowd drawing costs bounded. [Meet the squad](character-gallery.html) offers a rotating character preview, crowd drill and animated model downloads. See ASSETS.md for source models, credit use and processing.
 
 ## Controls
 
@@ -52,7 +52,7 @@ Settings provides progress export/import for moving learning data between device
 - `game.js`: 3D scene, interface, audio, input, educational encounters.
 - `characters.js` and `assets/characters/`: animated mesh crowds, rigged GLB exports, original source models, and the runtime pose data.
 - `index.html` and `style.css`: responsive and keyboard-accessible interface.
-- `tests/`: 47 rule, save, learning, character, and question-review checks.
+- `tests/`: 48 rule, save, learning, character, and question-review checks.
 - `CONTENT.md`: coverage and source notes.
 - `LICENSE.md`: code, learning content, and asset notices.
 

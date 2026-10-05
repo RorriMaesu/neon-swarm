@@ -300,8 +300,8 @@
       this.scene.add(new T.HemisphereLight(0xc6e4ee,0x203745,2.3));const sun=new T.DirectionalLight(0xffe4cf,3.1);sun.position.set(-9,22,12);this.scene.add(sun);const rim=new T.DirectionalLight(0x6ba9ff,1.6);rim.position.set(9,8,-20);this.scene.add(rim);
       this.unitCube=new T.BoxGeometry(1,1,1);this.dummy=new T.Object3D();this.dynamic=new Map();this.effects=[];this.effectGeo=new T.BoxGeometry(.09,.09,.09);this.materials=new Map();this.textureCache=new Map();
       this.city=[];this.stripes=[];this.panels=[];this.world=new T.Group();this.scene.add(this.world);this.buildWorld();this.batchStaticWorld();this.batchMovingWorld();
-      this.friends=new SwarmCharacters.AnimatedCrowd(this.scene,'medic',60,0x9ffff0);
-      this.enemyCrowds={walker:new SwarmCharacters.AnimatedCrowd(this.scene,'drone',360,0xff738b),stalker:new SwarmCharacters.AnimatedCrowd(this.scene,'stalker',360,0xff8b99),spitter:new SwarmCharacters.AnimatedCrowd(this.scene,'spitter',360,0xff77e5)};
+      this.friends=new SwarmCharacters.AnimatedCrowd(this.scene,'medic',60,0xffffff);
+      this.enemyCrowds={walker:new SwarmCharacters.AnimatedCrowd(this.scene,'drone',360,0xff738b),stalker:new SwarmCharacters.AnimatedCrowd(this.scene,'stalker',360,0xffffff),spitter:new SwarmCharacters.AnimatedCrowd(this.scene,'spitter',360,0xff77e5)};
       this.bossCrowd=new SwarmCharacters.AnimatedCrowd(this.scene,'stalker',1,0xffcf90);
       $('scene').dataset.characters='animated-models';
       this.shots=new T.InstancedMesh(this.unitCube,this.mat(0x91ffda,true),720);this.shots.instanceMatrix.setUsage(T.DynamicDrawUsage);this.shots.count=0;this.shots.frustumCulled=false;this.scene.add(this.shots);
@@ -512,5 +512,5 @@
   }
   try{engine=new Scene();}catch(e){console.error(e);showError(e.message);}
   wire();updateSound();refreshSetup();if(engine)requestAnimationFrame(frame);
-  window.NeonSwarm={snapshot:()=>game?{...game.snapshot(),paused,modal:modalKind,learning:activeLesson?{chapter:activeLesson.chapter,level:activeLesson.level,answered:activeLesson.answered,correct:activeLesson.correct}:null}:({phase:activeLesson?'study':'menu',mode:selectedMode,modal:modalKind,storage:storageOK,learning:activeLesson?{chapter:activeLesson.chapter,answered:activeLesson.answered,correct:activeLesson.correct}:null}),version:'2.3.1'};
+  window.NeonSwarm={snapshot:()=>game?{...game.snapshot(),paused,modal:modalKind,learning:activeLesson?{chapter:activeLesson.chapter,level:activeLesson.level,answered:activeLesson.answered,correct:activeLesson.correct}:null}:({phase:activeLesson?'study':'menu',mode:selectedMode,modal:modalKind,storage:storageOK,learning:activeLesson?{chapter:activeLesson.chapter,answered:activeLesson.answered,correct:activeLesson.correct}:null}),version:'2.4.0'};
 })();

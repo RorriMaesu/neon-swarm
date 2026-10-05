@@ -1,10 +1,11 @@
 {
   "medic": {
-    "source": "Mech.gltf",
+    "source": "Hyper3D Rodin Gen-1.5 Zero",
     "clip": "Run",
-    "frames": 16,
-    "duration": 0.8333333333333334,
-    "vertices": 2788
+    "frames": 24,
+    "duration": 0.8,
+    "vertices": 2964,
+    "triangles": 2700
   },
   "drone": {
     "source": "Enemy_Small.gltf",
@@ -14,11 +15,12 @@
     "vertices": 1477
   },
   "stalker": {
-    "source": "Enemy_Large.gltf",
+    "source": "Hyper3D Rodin Gen-1.5 Zero",
     "clip": "Run",
-    "frames": 16,
-    "duration": 0.5666666825612386,
-    "vertices": 2291
+    "frames": 24,
+    "duration": 0.7058823529411765,
+    "vertices": 2953,
+    "triangles": 2700
   },
   "spitter": {
     "source": "Enemy_Flying.gltf",

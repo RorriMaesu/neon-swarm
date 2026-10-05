@@ -17,13 +17,18 @@
   const geometry=new T.BufferGeometry(),base=new Float32Array(data.vertices*3),normal=new Float32Array(base.length),color=new Float32Array(base.length),vertex=new Float32Array(data.vertices);
   for(let v=0;v<data.vertices;v++){vertex[v]=v;for(let c=0;c<3;c++){base[v*3+c]=p[v*3+c]/4096;normal[v*3+c]=n[v*3+c]/32767;color[v*3+c]=colors[v*3+c]/255;}}
   geometry.setAttribute('position',new T.BufferAttribute(base,3));geometry.setAttribute('normal',new T.BufferAttribute(normal,3));geometry.setAttribute('color',new T.BufferAttribute(color,3));geometry.setAttribute('animVertex',new T.BufferAttribute(vertex,1));geometry.setIndex(new T.BufferAttribute(indices,1));
-  const value={geometry,positionTexture:texture(positions),normalTexture:texture(normals),data,width,height,rows};cache.set(name,value);return value;
+  let colorMap=null;
+  if(data.uvs&&data.texture){
+   geometry.setAttribute('uv',new T.BufferAttribute(decode(data.uvs,Float32Array),2));
+   colorMap=new T.TextureLoader().load(data.texture);colorMap.colorSpace=T.SRGBColorSpace;colorMap.anisotropy=2;
+  }
+  const value={geometry,colorMap,positionTexture:texture(positions),normalTexture:texture(normals),data,width,height,rows};cache.set(name,value);return value;
  }
  class AnimatedCrowd{
   constructor(scene,name,max,tint=0xffffff){
    const T=root.THREE;this.T=T;this.model=model(name,T);this.max=max;this.name=name;
    const m=this.model,geometry=m.geometry.clone();this.phase=new T.InstancedBufferAttribute(new Float32Array(max),1);this.rate=new T.InstancedBufferAttribute(new Float32Array(max),1);geometry.setAttribute('animPhase',this.phase);geometry.setAttribute('animRate',this.rate);
-   this.material=new T.MeshStandardMaterial({vertexColors:true,color:tint,roughness:.65,metalness:.12});this.uniforms={swarmTime:{value:0},poseMap:{value:m.positionTexture},normalMapPose:{value:m.normalTexture},poseSize:{value:new T.Vector2(m.width,m.height)},poseRows:{value:m.rows},poseFrames:{value:m.data.frames},poseDuration:{value:Math.max(.1,m.data.duration)}};
+   this.material=new T.MeshStandardMaterial({vertexColors:!m.colorMap,map:m.colorMap,color:tint,roughness:.65,metalness:.12});this.uniforms={swarmTime:{value:0},poseMap:{value:m.positionTexture},normalMapPose:{value:m.normalTexture},poseSize:{value:new T.Vector2(m.width,m.height)},poseRows:{value:m.rows},poseFrames:{value:m.data.frames},poseDuration:{value:Math.max(.1,m.data.duration)}};
    this.material.onBeforeCompile=shader=>{
     Object.assign(shader.uniforms,this.uniforms);
     shader.vertexShader=`uniform float swarmTime;uniform sampler2D poseMap;uniform sampler2D normalMapPose;uniform vec2 poseSize;uniform float poseRows;uniform float poseFrames;uniform float poseDuration;attribute float animVertex;attribute float animPhase;attribute float animRate;

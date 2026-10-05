@@ -45,3 +45,13 @@ All 47 Node checks pass. An isolated Edge browser verified 12 successive abandon
 The final bank also passed all chapter/section selectors, scoped Study sessions, full-section completion, hints and wrong-answer resume, frozen combat during Focus, coverage browsing, and 320/390-pixel phone layouts with no browser exceptions or failed requests. Three final-boss decisions and hint restoration passed. Animated asset and offline checks passed with 135 Expert enemies, 85 scene draw calls, no shader errors, and direct-file chapter 28 Study loading.
 
 Local browser reports are saved in the development workspace. Hosted verification runs the same review scenarios against the published game. Physical-phone and independent instructor-review limits described above still apply.
+
+## Rodin characters 2.4 verification
+
+All 48 Node checks pass, including valid animated GLBs, 17-bone skins, 24-pose humanoid motion, bounded topology, finite UVs, embedded JPEG atlases and a smooth loop boundary. Both humanoids have 2,700 triangles and fewer than 3,000 runtime vertices. The bank and combat rule checks continue to pass.
+
+Blender inspection covered front, rear and elevated views of both original meshes and sampled running poses. The original UV-split surface is welded before decimation to prevent disconnected armor edges. Close-up browser previews show the generated paint and independently phased motion without shader or JavaScript errors. The gallery crowd drill renders 150 pursuers and 18 guardians in four total scene draws, with 453,602 triangles including the floor. This is a renderer count, not a physical-phone performance measurement.
+
+Local browser checks covered desktop Expert combat, the corrected 390-pixel gallery framing, a verified 390-by-844 gameplay viewport, pointer steering, combat pause and saving back to setup. All runtime resources are local or embedded; hashes verified the complete saved Desktop checkpoint. The in-app browser blocks file:// navigation, so direct-file execution of this new release could not be checked in that browser. The localhost and hosted paths remain testable; direct-file compatibility is supported by the self-contained asset format and relative-path checks.
+
+Only running locomotion is authored for the new robots. Firing, damage and defeat still use game effects. Their original generated exports, local rigging tools, editable Blender scenes, credit ledger and provenance are retained. Total actual observed Rodin credit use: 1.5; remaining balance: 5.5. No purchase or subscription.

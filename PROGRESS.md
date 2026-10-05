@@ -87,3 +87,12 @@ Open index.html or double-click Play Neon Swarm.cmd to play. This folder is upda
 - All 47 automated checks and final local browser checks pass, including repeated-session variety, labeled review, progress transfer, old-session migration, phone layouts, and offline animated models.
 
 - GitHub Pages and all 28 hosted banks passed the review scenarios; final release 2.3.1 clarifies the diencephalon identification prompt.
+
+## Rodin characters 2.4 checkpoint
+
+- Downloaded original guardian and stalker PBR/shaded models through Rodin Gen-1.5 Zero. The Gen-2.5 guardian preview remains subscription gated; no purchase was made.
+- Used 1.5 of the 7 existing credits. Last observed balance: 5.5. Prompts, references, job URLs, hashes and costs are retained.
+- Welded and optimized both meshes to 2,700 triangles, created 17-bone bipeds, and authored 24-pose running loops in local Blender.
+- Added shared base-color atlases and UVs to the crowd renderer, retaining five or fewer character draws. Standard animated GLBs and editable Blender scenes are saved.
+- Added an offline character gallery with rotation, animation pause, downloads and a 150-pursuer/18-guardian crowd drill.
+- Browser, mobile-layout and final publishing results are recorded in QA.md as verification completes.

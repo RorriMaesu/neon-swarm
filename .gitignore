@@ -2,3 +2,7 @@ _site/
 node_modules/
 *.log
 .DS_Store
+__pycache__/
+assets/characters/rodin/*.blend*
+assets/characters/rodin/*-preview.glb
+assets/characters/rodin/*-original.zip

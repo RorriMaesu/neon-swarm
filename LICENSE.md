@@ -32,4 +32,6 @@ Three.js 0.160.1: MIT License. The full notice is retained in vendor/THREE-LICEN
 
 ## Character assets
 
-Quaternius Ultimate Space Kit (March 2023): Creative Commons Zero (CC0 1.0). Original models, embedded atlas textures, authored skeletal clips, optimized GLB exports, and runtime animation bakes are in assets/characters/. Source: https://quaternius.com/packs/ultimatespacekit.html . CC0: https://creativecommons.org/publicdomain/zero/1.0/ . Character names and modifications are recorded in ASSETS.md. No Meshy-generated models are included in this release.
+Quaternius Ultimate Space Kit (March 2023): Creative Commons Zero (CC0 1.0). The flying creatures and retained original source models are CC0. Source: https://quaternius.com/packs/ultimatespacekit.html . CC0: https://creativecommons.org/publicdomain/zero/1.0/ .
+
+The rescue guardian and armored stalker were generated for this project with Hyper3D Rodin Gen-1.5 Zero, then rigged and animated locally in Blender. Their generated meshes and textures are subject to Hyper3D's Rodin output terms (section 5(b)) and applicable third-party rights: https://hyper3d.ai/legal/terms . The code license above does not override those terms. Their originals, job URLs, processing steps and confirmation ledger are described in ASSETS.md and RODIN-ASSET-PLAN.md. No Meshy-generated models are included.

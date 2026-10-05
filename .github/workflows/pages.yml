@@ -31,7 +31,7 @@ jobs:
       - name: Prepare the static game
         run: |
           mkdir -p _site
-          cp index.html style.css core.js curriculum.js section-catalog.js learning.js characters.js game.js LICENSE.md ASSETS.md BALANCE.md CONTENT.md COVERAGE.md QUESTION-REVIEW.md question-review.json coverage.json .nojekyll _site/
+          cp index.html character-gallery.html style.css core.js curriculum.js section-catalog.js learning.js characters.js game.js LICENSE.md ASSETS.md RODIN-ASSET-PLAN.md BALANCE.md CONTENT.md COVERAGE.md QUESTION-REVIEW.md question-review.json coverage.json .nojekyll _site/
           cp -r assets vendor content _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
