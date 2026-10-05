@@ -11,3 +11,4 @@
 .upgrade-option>span{flex:0 0 48px;width:48px;font-size:24px}
 @media(max-height:500px) and (max-width:900px){.mobile-launch{position:absolute}}
 @media(max-width:400px){.result-stats{grid-template-columns:repeat(2,1fr)}.result-stats>div:first-child{grid-column:1/-1;padding-bottom:12px}.result-stats>div:first-child strong{font-size:32px}}
+*{scrollbar-width:thin;scrollbar-color:#3c5158 transparent}::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#3c5158;border-radius:4px}
