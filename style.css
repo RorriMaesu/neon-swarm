@@ -9,3 +9,4 @@
 @media(prefers-reduced-motion:reduce){button,.announcer,.toast{transition:none}.float-label{animation-duration:.4s}}
 @media(max-width:700px){.topbar .icon-btn{width:40px;height:40px;font-size:18px}.topbar .off-slash{left:10px;top:19px}.mobile-mode-list button{min-height:44px}.pause-btn{width:44px;height:44px}.hud-top{top:15px}.wave-track{top:68px}.hud-stats{top:84px}}
 .upgrade-option>span{flex:0 0 48px;width:48px;font-size:24px}
+@media(max-height:500px) and (max-width:900px){.mobile-launch{position:absolute}}

@@ -91,7 +91,7 @@
     if(modalKind==='settings')persist();
     if(!modalKind){lastFocus=document.activeElement;wasPaused=paused;}
     if(pause&&game?.phase==='playing')paused=true;
-    modalKind=kind;$('modal-content').innerHTML=html;$('modal-backdrop').classList.remove('hidden');$('modal-close').classList.toggle('hidden',['upgrade','result','pause'].includes(kind));$('modal').focus();
+    modalKind=kind;$('modal-content').innerHTML=html;const heading=$('modal-content').querySelector('h2');if(heading)heading.id='modal-title';$('modal-backdrop').classList.remove('hidden');$('modal-close').classList.toggle('hidden',['upgrade','result','pause'].includes(kind));$('modal').focus();
   }
   function closeModal(resume=true){
     if(!modalKind)return;
@@ -145,7 +145,7 @@
       this.renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();paused=true;showError('The graphics connection was interrupted. Reload to return to the skyway.');});
       this.scene.add(new T.HemisphereLight(0xc6e4ee,0x203745,2.3));const sun=new T.DirectionalLight(0xffe4cf,3.1);sun.position.set(-9,22,12);this.scene.add(sun);const rim=new T.DirectionalLight(0x6ba9ff,1.6);rim.position.set(9,8,-20);this.scene.add(rim);
       this.unitCube=new T.BoxGeometry(1,1,1);this.dummy=new T.Object3D();this.dynamic=new Map();this.effects=[];this.effectGeo=new T.BoxGeometry(.09,.09,.09);this.materials=new Map();this.textureCache=new Map();
-      this.city=[];this.stripes=[];this.panels=[];this.world=new T.Group();this.scene.add(this.world);this.buildWorld();this.batchStaticWorld();
+      this.city=[];this.stripes=[];this.panels=[];this.world=new T.Group();this.scene.add(this.world);this.buildWorld();this.batchStaticWorld();this.batchMovingWorld();
       this.friends=this.robotBatch(60,true);this.enemies=this.robotBatch(350,false);
       this.shots=new T.InstancedMesh(this.unitCube,this.mat(0x91ffda,true),720);this.shots.instanceMatrix.setUsage(T.DynamicDrawUsage);this.shots.count=0;this.shots.frustumCulled=false;this.scene.add(this.shots);
       this.shadowGeo=new T.CircleGeometry(1,10);this.shadows=new T.InstancedMesh(this.shadowGeo,new T.MeshBasicMaterial({color:0x071d26,transparent:true,opacity:.24,depthWrite:false}),420);this.shadows.frustumCulled=false;this.scene.add(this.shadows);
@@ -192,6 +192,11 @@
       const moving=new Set([...this.stripes,...this.panels]),groups=new Map();
       this.world.traverse(n=>{if(n.isMesh&&n.geometry===this.unitCube&&!moving.has(n)){if(!groups.has(n.material))groups.set(n.material,[]);groups.get(n.material).push(n);}});
       for(const [material,parts]of groups){const batch=new this.T.InstancedMesh(this.unitCube,material,parts.length);parts.forEach((p,i)=>{batch.setMatrixAt(i,p.matrixWorld);p.parent.remove(p);});batch.instanceMatrix.needsUpdate=true;this.world.add(batch);}
+    }
+    batchMovingWorld(){
+      const groups=new Map();this.movingBatches=[];
+      for(const part of [...this.stripes,...this.panels]){if(!groups.has(part.material))groups.set(part.material,[]);groups.get(part.material).push(part);this.world.remove(part);}
+      for(const [material,parts]of groups){const mesh=new this.T.InstancedMesh(this.unitCube,material,parts.length);mesh.instanceMatrix.setUsage(this.T.DynamicDrawUsage);mesh.frustumCulled=false;this.world.add(mesh);this.movingBatches.push({mesh,parts});}
     }
     robotBatch(max,friendly){
       const T=this.T,body=this.mat(friendly?0x21b894:0xeb745f),head=this.mat(friendly?0x65bca8:0xf9a181),dark=this.mat(friendly?0x174d57:0x583447),eye=this.mat(friendly?0xceff9f:0xffebb0,true);
@@ -308,10 +313,11 @@
         for(const s of this.stripes){s.position.z+=dt*(state.speed||7);if(s.position.z>23)s.position.z-=117;}
         for(const p of this.panels){p.position.z+=dt*(state.speed||7);if(p.position.z>23)p.position.z-=119.6;}
       }
+      for(const batch of this.movingBatches){batch.parts.forEach((p,i)=>{p.updateMatrix();batch.mesh.setMatrixAt(i,p.matrix);});batch.mesh.instanceMatrix.needsUpdate=true;}
       for(let i=this.effects.length-1;i>=0;i--){const e=this.effects[i];e.life-=dt;if(e.life<=0){this.scene.remove(e.mesh);if(e.ownsGeometry)e.mesh.geometry.dispose();e.mesh.material.dispose();this.effects.splice(i,1);continue;}e.mesh.material.opacity=Math.min(1,e.life/e.max);if(e.ring)e.mesh.scale.setScalar(1+(1-e.life/e.max)*22);else{e.mesh.position.x+=e.vx*dt;e.mesh.position.y+=e.vy*dt;e.mesh.position.z+=e.vz*dt;e.vy-=dt*7;e.mesh.rotation.x+=dt*3;}}
       this.camera.position.copy(this.baseCamera);
       if(shakeTime>0&&!save.settings.reduced){this.camera.position.x+=(Math.random()-.5)*.12;this.camera.position.y+=(Math.random()-.5)*.1;}
-      this.renderer.toneMappingExposure=1.25+(flashTime>0&&!save.settings.reduced?flashTime*.6:0);this.renderer.render(this.scene,this.camera);
+      this.renderer.toneMappingExposure=1.25+(flashTime>0&&!save.settings.reduced?flashTime*.6:0);this.renderer.render(this.scene,this.camera);$('scene').dataset.drawCalls=String(this.renderer.info.render.calls);
     }
   }
   function demoState(t){
