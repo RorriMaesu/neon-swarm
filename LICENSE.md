@@ -29,3 +29,7 @@ OpenStax does not endorse or maintain this independent game. Its trademarks are 
 ## Third-party engine
 
 Three.js 0.160.1: MIT License. The full notice is retained in vendor/THREE-LICENSE.txt.
+
+## Character assets
+
+Quaternius Ultimate Space Kit (March 2023): Creative Commons Zero (CC0 1.0). Original models, embedded atlas textures, authored skeletal clips, optimized GLB exports, and runtime animation bakes are in assets/characters/. Source: https://quaternius.com/packs/ultimatespacekit.html . CC0: https://creativecommons.org/publicdomain/zero/1.0/ . Character names and modifications are recorded in ASSETS.md. No Meshy-generated models are included in this release.

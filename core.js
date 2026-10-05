@@ -8,10 +8,10 @@
   'use strict';
   const CAP = 60, PLAYER_Z = 13, ROAD_HALF = 4.8;
   const DIFFICULTIES = Object.freeze({
-    explorer: Object.freeze({name:'Explorer',budget:.78,hp:.85,warning:1.65,shield:12,leak:.75,hazards:1}),
-    standard: Object.freeze({name:'Standard',budget:1,hp:1,warning:1.35,shield:8,leak:1,hazards:2}),
-    veteran: Object.freeze({name:'Veteran',budget:1.35,hp:1.10,warning:1.15,shield:5,leak:1.15,hazards:1}),
-    expert: Object.freeze({name:'Expert',budget:1.75,hp:1.15,warning:1,shield:3,leak:1.3,hazards:1})
+    explorer: Object.freeze({name:'Explorer',budget:1,hp:.85,warning:1.65,shield:12,leak:.75,interval:4.1,pace:.92,elite:.10}),
+    standard: Object.freeze({name:'Standard',budget:1.65,hp:1,warning:1.35,shield:8,leak:1,interval:3.5,pace:1,elite:.15}),
+    veteran: Object.freeze({name:'Veteran',budget:2.25,hp:1.18,warning:1.15,shield:5,leak:1.15,interval:2.9,pace:1.08,elite:.20}),
+    expert: Object.freeze({name:'Expert',budget:2.8,hp:1.25,warning:1,shield:3,leak:1.3,interval:2.65,pace:1.12,elite:.20})
   });
   const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
   function random(seed) {
@@ -91,7 +91,7 @@
       this.hazards = [];
       this.boss = null;
       this.events = [];
-      this.waveTimer = 6;
+      this.waveTimer = 3;
       this.gateTimer = 18;
       this.crateTimer = 16;
       this.fireTimer = 0;
@@ -120,8 +120,10 @@
       const hp = kind==='recruits'?9+this.sector*2:14+this.sector*3;
       this.crates.push({id:this.uid(),x,z,kind,amount:amount || (kind==='recruits'?2:kind==='shield'?4:1),hp,maxHp:hp});
     }
-    spawnWave(z = -48, bossWave = false) {
-      const n = Math.min(26,Math.round((4 + Math.min(9,Math.floor(this.sectorTime/18)+this.sector) + (bossWave?1:0))*this.profile.budget));
+    spawnWave(z = -36, bossWave = false) {
+      // Dense, staggered rows reach the visible road before bullets can erase them.
+      const n = Math.min(90,Math.round((8+this.sector*2+Math.min(10,Math.floor(this.sectorTime/10)*2))*this.profile.budget*(bossWave?.65:1)),360-this.enemies.length);
+      if(n<=0)return;
       const wave = ++this.waveId;
       for(const key of this.waveLeaks.keys())if(key<wave-50)this.waveLeaks.delete(key);
       const spread = this.rng();
@@ -129,12 +131,12 @@
       for(let i=0;i<n;i++) {
         let kind = 'walker';
         const r=this.rng();
-        if(this.sectorTime>12 && r<.2) kind='runner';
-        else if(this.sectorTime>20 && r>.78) kind='brute';
+        if(this.sectorTime>9 && r<.22) kind='runner';
+        else if(this.sectorTime>15 && r>1-this.profile.elite) kind=i%3===0?'spitter':'brute';
         const pressure=this.mode==='endless'?Math.pow(1.18,Math.max(0,this.sector-3)):1;
-        const hp = Math.ceil((kind==='brute'?10+this.sector*3:kind==='runner'?2+this.sector:2+Math.floor(this.sector*.8))*pressure*this.profile.hp);
-        const x = spread<.38?clamp(lane+(i%3-1)*.65,-4.1,4.1):-3.9+(i%9)*.96+(this.rng()-.5)*.22;
-        this.enemies.push({id:this.uid(),wave,x,z:z-Math.floor(i/9)*1.7-this.rng()*2,kind,hp,maxHp:hp,speed:kind==='runner'?1.45:kind==='brute'?.72:1,damage:kind==='brute'?4:kind==='runner'?2:1,wobble:this.rng()*6.28});
+        const hp = Math.ceil((kind==='brute'?9+this.sector*3:kind==='spitter'?5+this.sector*2:kind==='runner'?1+this.sector*.6:1+this.sector*.35)*pressure*this.profile.hp);
+        const x = spread<.22?clamp(lane+(i%5-2)*.72,-4.1,4.1):-4+(i%11)*.8+(this.rng()-.5)*.13;
+        this.enemies.push({id:this.uid(),wave,x,z:z-Math.floor(i/11)*1.4-this.rng()*.8,kind,hp,maxHp:hp,speed:(kind==='runner'?1.5:kind==='brute'?.83:1)*this.profile.pace,damage:kind==='brute'?4:kind==='runner'?2:1,wobble:this.rng()*6.28,attack:1+this.rng()*1.5});
       }
       if(!bossWave&&this.sectorTime>23&&this.hazards.length===0&&this.rng()<.32)this.spawnHazard(this.x,-25);
     }
@@ -180,7 +182,7 @@
         const p=poses[i];
         const spread = this.weapon==='spread' && i%2===0 ? [-.075,.075] : [0];
         for(const dx of spread) {
-          this.shots.push({id:this.uid(),x:p.x,z:p.z-.6,previousZ:p.z-.6,dx,damage:this.damage*(1+.25*(this.weaponLevel-1))*(this.weapon==='spread'?.75:1),pierce:this.weapon==='pierce'?2:0,hit:[],life:0,color:this.overdrive>0?'violet':'mint'});
+          this.shots.push({id:this.uid(),x:p.x,z:p.z-.6,previousZ:p.z-.6,dx,damage:this.damage*(1+.25*(this.weaponLevel-1))*(this.weapon==='spread'?.75:1),pierce:this.weapon==='pierce'?3:this.weapon==='pulse'?1:0,hit:[],life:0,color:this.overdrive>0?'violet':'mint'});
         }
       }
       if(this.shots.length>720)this.shots.splice(0,this.shots.length-720);
@@ -276,7 +278,7 @@
       const travel=this.speed*dt;
       if(!this.bossAppeared) {
         this.waveTimer-=dt;this.gateTimer-=dt;this.crateTimer-=dt;
-        if(this.waveTimer<=0){this.spawnWave();this.waveTimer=Math.max(3,5-this.sector*.2-this.sectorTime*.018);}
+        if(this.waveTimer<=0){this.spawnWave();this.waveTimer=Math.max(1.65,this.profile.interval-(this.sector-1)*.12-this.sectorTime*.008);}
         if(this.gateTimer<=0 && this.sectorTime<34){this.spawnGate();this.gateTimer=18+this.rng()*3;}
         if(this.crateTimer<=0 && this.sectorTime<39){this.spawnCrate();this.crateTimer=15+this.rng()*3;}
         if(this.sectorTime>=44)this.spawnBoss();
@@ -310,6 +312,7 @@
       const poses=formation(this.count,this.x);
       for(let i=this.enemies.length-1;i>=0;i--) {
         const e=this.enemies[i];e.z+=travel*e.speed;
+        if(e.kind==='spitter'&&e.z>-13&&e.hp>0){e.attack-=dt;if(e.attack<=0){if(!this.hazards.length)this.spawnHazard(this.x,e.z);e.attack=4;}}
         if(e.kind==='runner')e.x=clamp(e.x+Math.sin(this.time*3+e.wobble)*dt*.35,-4.2,4.2);
         if(e.hp<=0){this.kills++;this.score+=kindScore(e.kind);this.charge=Math.min(100,this.charge+(e.kind==='brute'?3:1.05));this.emit('pop',{x:e.x,z:e.z,kind:e.kind});this.enemies.splice(i,1);continue;}
         const collision=poses.some(p=>Math.abs(p.x-e.x)<(e.kind==='brute'?.65:.43)&&Math.abs(p.z-e.z)<.68);
@@ -321,7 +324,9 @@
         b.z=Math.min(-16,b.z+travel*.6);
         b.x=Math.sin(b.age*.6)*2.05;
         b.attack-=dt;
-        if(b.attack<=0){if(this.hazards.length===0)this.spawnHazard(this.x,b.z+2);b.attack=Math.max(2.1,4.6-this.sector*.25)/Math.sqrt(this.profile.budget);this.spawnWave(-38,true);}
+        if(b.attack<=0){if(this.hazards.length===0)this.spawnHazard(this.x,b.z+2);b.attack=Math.max(1.85,3.8-this.sector*.2)/Math.sqrt(this.profile.pace);}
+        this.waveTimer-=dt;
+        if(this.waveTimer<=0){this.spawnWave(-34,true);this.waveTimer=this.profile.interval+.6;}
         if(b.hp<=0){this.bossKilled();return;}
       }
       for(let i=this.hazards.length-1;i>=0;i--) {
@@ -347,7 +352,7 @@
             if(s.pierce>0)s.pierce--;else{consumed=true;break;}
           }
         }
-        if(consumed||s.z<-58||Math.abs(s.x)>6||s.life>2)this.shots.splice(i,1);
+        if(consumed||s.z<-29||Math.abs(s.x)>6||s.life>2)this.shots.splice(i,1);
       }
       if(this.boss && this.boss.age>75){this.emit('enrage');this.boss.attack=Math.min(this.boss.attack,.6);}
     }
@@ -370,6 +375,6 @@
       return g;
     }
   }
-  function kindScore(kind){return kind==='brute'?80:kind==='runner'?40:25;}
+  function kindScore(kind){return kind==='brute'?80:kind==='spitter'?60:kind==='runner'?40:25;}
   return {Game,random,dateSeed,applyGate,formation,clamp,CAP,PLAYER_Z,ROAD_HALF,DIFFICULTIES};
 });

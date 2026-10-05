@@ -30,3 +30,11 @@ Open index.html or double-click Play Neon Swarm.cmd to play. This folder is upda
 - Preserved prior checkpoints and records.
 - All 31 automated checks and section-focused desktop/phone browser checks passed.
 - COVERAGE.md and coverage.json document the scope and instructor-review limits.
+
+## Hordes and animated characters 2.2 checkpoint
+
+- Expert waves now contain 28–50 enemies in sector one, arriving every 2.65–2.3 seconds, with armored pursuers, fast flanks, and ranged spitters.
+- All profiles have denser waves; bosses receive continuing reinforcements. Pulse ammunition penetrates a second target, and bullets cannot erase distant waves before they reach the visible road.
+- Added four real CC0 animated character assets, optimized with local Blender, and a larger animated boss. Shared vertex animation textures render independent animation phases with five character draws at most.
+- 37 rule, learning, and model checks pass. A 600-run balance audit separates the four settings and demonstrates Expert victories under a tactical policy.
+- Desktop progress is saved. Meshy is signed in but shows 0 credits; custom generation awaits available credits and the user’s spending limit.

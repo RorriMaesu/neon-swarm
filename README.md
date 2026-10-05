@@ -10,6 +10,8 @@ For the Desktop copy, double-click **Play Neon Swarm.cmd** or open **index.html*
 
 Choose Chapter mission, Study, Arcade, Endless, or Daily. Study has no combat and remains usable when WebGL is unavailable. Any of the 28 chapters can be selected immediately. Section practice includes 15,976 source-linked questions across all 169 numbered sections and 28 introductions. Explore section coverage lists objectives, topics, counts, and your progress. Study offers 20, 40, or the full set; chapter missions sample a short set. See COVERAGE.md for the scope and review limits.
 
+Detailed animated characters replace the original primitive figures. Four CC0 Quaternius characters include running mechs, flying swarm drones, armored stalkers, spitters, and a scaled animated boss. The game shares animation textures across the crowd to keep drawing costs bounded. See ASSETS.md for source models, Blender processing, and the Meshy replacement plan.
+
 ## Controls
 
 | Action | Desktop | Phone |
@@ -27,7 +29,7 @@ Correct independent recall awards at most six bonus shield points per sector. Th
 
 ## Difficulty
 
-Explorer has generous warnings and shields. Standard requires active defense. Veteran adds mixed-wave pressure. Expert emphasizes demanding resource choices. Question types are independent: All types, Terminology, Relationships, or Examples & application. Reading is untimed at every combat setting.
+Explorer has generous warnings and shields. Standard requires active defense. Veteran adds mixed-wave pressure. Expert now opens with 28 enemies per wave and reaches about 50 in the first sector, with faster spawns, armored pursuers, ranged spitters, and continuing boss reinforcements. Pulse rounds penetrate two enemies. Question types are independent: All types, Terminology, Relationships, or Examples & application. Reading is untimed at every combat setting.
 
 Escaped enemies damage capsule integrity, with a per-wave limit. Losing the capsule or all bots ends the run. Defeat offers a sector retry. Recruitment grows gradually, doubling is limited to recovery opportunities, weapon stacking is capped, and Overdrive weakens heavies without automatically breaking crates.
 
@@ -47,7 +49,8 @@ Settings provides progress export/import for moving learning data between device
 - `curriculum.js`: original authored concepts, 16 pathways, chapter references.
 - `section-catalog.js` and `content/`: section map and 15,976 static source-linked questions.
 - `learning.js`: question preparation, section selection, review priority, compact checkpoints, progress validation.
-- `game.js`: original procedural 3D models, interface, audio, input, educational encounters.
+- `game.js`: 3D scene, interface, audio, input, educational encounters.
+- `characters.js` and `assets/characters/`: animated mesh crowds, rigged GLB exports, original source models, and the runtime pose data.
 - `index.html` and `style.css`: responsive and keyboard-accessible interface.
 - `tests/`: 31 rule, save, learning, and section-coverage checks.
 - `CONTENT.md`: coverage and source notes.

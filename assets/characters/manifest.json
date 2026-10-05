@@ -1,0 +1,30 @@
+{
+  "medic": {
+    "source": "Mech.gltf",
+    "clip": "Run",
+    "frames": 16,
+    "duration": 0.8333333333333334,
+    "vertices": 2788
+  },
+  "drone": {
+    "source": "Enemy_Small.gltf",
+    "clip": "Fast_Flying",
+    "frames": 16,
+    "duration": 0.8333333333333334,
+    "vertices": 1477
+  },
+  "stalker": {
+    "source": "Enemy_Large.gltf",
+    "clip": "Run",
+    "frames": 16,
+    "duration": 0.5666666825612386,
+    "vertices": 2291
+  },
+  "spitter": {
+    "source": "Enemy_Flying.gltf",
+    "clip": "Fast_Flying",
+    "frames": 16,
+    "duration": 0.8333333333333334,
+    "vertices": 2253
+  }
+}

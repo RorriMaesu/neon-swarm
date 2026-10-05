@@ -45,12 +45,12 @@
   const Curriculum=window.BodyguardCurriculum, Learning=window.BodyguardLearning;
   const escapeHTML=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const modeNames={lesson:'Chapter mission',study:'Study',campaign:'Arcade',endless:'Endless',daily:'Daily'};
-  const difficultyNotes={explorer:'Generous warnings and shields. Defend every lane at a gentler pace.',standard:'Active defense, measured growth, and bosses that fight back.',veteran:'More mixed waves and less room for missed threats.',expert:'Intense waves, tighter protection, and demanding resource choices.'};
+  const difficultyNotes={explorer:'Generous warnings and shields. Defend every lane at a gentler pace.',standard:'Active defense, measured growth, and bosses that fight back.',veteran:'Dense waves with armored pursuers and ranged spitters. Fast decisions and well-timed Overdrive matter.',expert:'Relentless hordes, fast flanks, armored attackers, and almost no starting protection. For practiced defenders.'};
   let activeLesson=null,sectorCheckpoint=null,focusSelection=null,focusStep=0,focusAssisted=false,focusOpened=0,checkpointTimer=0;
   function chapter(){return Curriculum.chapters.find(c=>c.id===Number(save.settings.chapter))||Curriculum.chapters[0];}
   function educational(){return ['lesson','study'].includes(selectedMode);}
   function localDate(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-  function recordKey(){return ['v2.1.0',selectedMode,save.settings.difficulty,educational()?chapter().id:'arcade',educational()?save.settings.knowledge:'',educational()?save.settings.topic:'',selectedMode==='daily'?localDate():''].join(':');}
+  function recordKey(){return ['v2.2.0',selectedMode,save.settings.difficulty,educational()?chapter().id:'arcade',educational()?save.settings.knowledge:'',educational()?save.settings.topic:'',selectedMode==='daily'?localDate():''].join(':');}
   function refreshRecord(){const r=save.records[recordKey()];$('best-score').textContent=String(r?.score||0).padStart(6,'0');$('best-caption').textContent=selectedMode==='study'?'Study tracks concepts, with no combat score.':r?`${r.peak} bots at peak · ${r.kills} disruptions cleared`:'Your first mission with this setup awaits.';}
   function refreshSetup(){
     const c=chapter();if(!Curriculum.scope(c.id,save.settings.topic).length)save.settings.topic='all';
@@ -266,7 +266,7 @@
   function showPause(){
     if(!game||game.phase!=='playing')return;paused=true;keys.clear();dragging=false;rememberRun();showModal('pause','<span class="eyebrow">TAKE A BREATHER</span><h2>The capsule can wait.</h2><p>Movement, warnings, charge, and buffs are frozen.</p><button class="primary" id="resume-btn">CONTINUE MISSION ↗</button><button class="secondary" id="pause-home">SAVE & RETURN TO SETUP</button><button class="secondary" id="end-run">END THIS RUN</button>',false);$('resume-btn').onclick=()=>{closeModal(false);paused=false;unlockAudio();};$('pause-home').onclick=()=>home(true);$('end-run').onclick=()=>home();
   }
-  function showGuide(){showModal('guide','<span class="eyebrow">BODYGUARD FIELD GUIDE</span><h2>Defend. Discover. Remember.</h2><div class="guide-row"><span>↔</span><div><strong>Intercept the waves</strong><p>Steer with A/D, arrows, or drag. Shooting is automatic. Escaped enemies damage your capsule; losing every bot also ends the run.</p></div></div><div class="guide-row"><span>+</span><div><strong>Grow with care</strong><p>Pick gates with your squad center. Break crates and collect their loot. Recruits, weapon choices, and shields help, but growth is limited.</p></div></div><div class="guide-row"><span>◎</span><div><strong>Focus checkpoints</strong><p>Combat freezes while you read. Select one answer target, then Fire answer. Number keys select; Enter fires. A hint marks an assisted attempt. Pathways require each stage in order.</p></div></div><div class="guide-row"><span>✳</span><div><strong>Use your emergency burst</strong><p>Space or the Overdrive button clears small enemies and warning bolts, weakens heavies, and gives brief protection. It does not open crates for you.</p></div></div><div class="guide-row"><span>↗</span><div><strong>Keep learning</strong><p>Choose a chapter and a section, or mix a whole chapter. Explore section coverage shows topics and question counts. Study has no combat and offers 20, 40, or the full question set. Progress is saved in this browser; export it in Settings to move it between devices. Retained requires varied, unassisted recall on later days.</p></div></div><button class="primary" id="guide-done">GOT IT ↗</button>');$('guide-done').onclick=()=>closeModal();}
+  function showGuide(){showModal('guide','<span class="eyebrow">BODYGUARD FIELD GUIDE</span><h2>Defend. Discover. Remember.</h2><div class="guide-row"><span>↔</span><div><strong>Intercept the waves</strong><p>Steer with A/D, arrows, or drag. Shooting is automatic. Pulse shots penetrate two targets: line up rows. Small drones swarm, runners rush, armored stalkers absorb fire, and purple spitters launch warned strikes. Escaped enemies damage your capsule; losing every bot also ends the run.</p></div></div><div class="guide-row"><span>+</span><div><strong>Grow with care</strong><p>Pick gates with your squad center. Break crates and collect their loot. Recruits, weapon choices, and shields help, but growth is limited.</p></div></div><div class="guide-row"><span>◎</span><div><strong>Focus checkpoints</strong><p>Combat freezes while you read. Select one answer target, then Fire answer. Number keys select; Enter fires. A hint marks an assisted attempt. Pathways require each stage in order.</p></div></div><div class="guide-row"><span>✳</span><div><strong>Use your emergency burst</strong><p>Space or the Overdrive button clears small enemies and warning bolts, weakens heavies, and gives brief protection. It does not open crates for you.</p></div></div><div class="guide-row"><span>↗</span><div><strong>Keep learning</strong><p>Choose a chapter and a section, or mix a whole chapter. Explore section coverage shows topics and question counts. Study has no combat and offers 20, 40, or the full question set. Progress is saved in this browser; export it in Settings to move it between devices. Retained requires varied, unassisted recall on later days.</p></div></div><button class="primary" id="guide-done">GOT IT ↗</button>');$('guide-done').onclick=()=>closeModal();}
   function showSettings(){
     showModal('settings',`<span class="eyebrow">MAKE YOURSELF COMFORTABLE</span><h2>Your simulation.</h2><div class="settings-row"><label for="sound-setting">Sound effects</label><input type="checkbox" id="sound-setting" ${save.settings.sound?'checked':''}></div><div class="settings-row"><label for="reduced-setting">Reduced motion</label><input type="checkbox" id="reduced-setting" ${save.settings.reduced?'checked':''}></div><div class="settings-row"><label for="quality-setting">Graphics quality</label><select id="quality-setting"><option value="auto">Auto</option><option value="low">Low</option><option value="high">High</option></select></div><p>Progress stays in this browser. Export a copy to transfer it to another device. Existing arcade records are preserved separately.</p><button class="secondary" id="export-progress">EXPORT LEARNING PROGRESS</button><label class="import-control">IMPORT LEARNING PROGRESS<input type="file" id="import-progress" accept="application/json,.json"></label><button class="secondary" id="reset-progress">RESET LEARNING PROGRESS…</button><p class="setup-note">Source-linked questions practice terminology, relationships, and examples. The textbook links provide complete explanations.</p><button class="primary" id="settings-done">DONE ↗</button>`);
     $('quality-setting').value=save.settings.quality;$('sound-setting').onchange=e=>{save.settings.sound=e.target.checked;updateSound();unlockAudio();persist();};$('reduced-setting').onchange=e=>{save.settings.reduced=e.target.checked;persist();};$('quality-setting').onchange=e=>{save.settings.quality=e.target.value;engine?.resize();persist();};$('settings-done').onclick=()=>closeModal();
@@ -297,8 +297,12 @@
       this.scene.add(new T.HemisphereLight(0xc6e4ee,0x203745,2.3));const sun=new T.DirectionalLight(0xffe4cf,3.1);sun.position.set(-9,22,12);this.scene.add(sun);const rim=new T.DirectionalLight(0x6ba9ff,1.6);rim.position.set(9,8,-20);this.scene.add(rim);
       this.unitCube=new T.BoxGeometry(1,1,1);this.dummy=new T.Object3D();this.dynamic=new Map();this.effects=[];this.effectGeo=new T.BoxGeometry(.09,.09,.09);this.materials=new Map();this.textureCache=new Map();
       this.city=[];this.stripes=[];this.panels=[];this.world=new T.Group();this.scene.add(this.world);this.buildWorld();this.batchStaticWorld();this.batchMovingWorld();
-      this.friends=this.robotBatch(60,true);this.enemies=this.robotBatch(350,false);
+      this.friends=new SwarmCharacters.AnimatedCrowd(this.scene,'medic',60,0x9ffff0);
+      this.enemyCrowds={walker:new SwarmCharacters.AnimatedCrowd(this.scene,'drone',360,0xff738b),stalker:new SwarmCharacters.AnimatedCrowd(this.scene,'stalker',360,0xff8b99),spitter:new SwarmCharacters.AnimatedCrowd(this.scene,'spitter',360,0xff77e5)};
+      this.bossCrowd=new SwarmCharacters.AnimatedCrowd(this.scene,'stalker',1,0xffcf90);
+      $('scene').dataset.characters='animated-models';
       this.shots=new T.InstancedMesh(this.unitCube,this.mat(0x91ffda,true),720);this.shots.instanceMatrix.setUsage(T.DynamicDrawUsage);this.shots.count=0;this.shots.frustumCulled=false;this.scene.add(this.shots);
+      this.armorBars=[0x412a39,colors.coral].map(color=>{const m=new T.InstancedMesh(this.unitCube,this.mat(color,true),360);m.instanceMatrix.setUsage(T.DynamicDrawUsage);m.frustumCulled=false;m.count=0;this.scene.add(m);return m;});
       this.shadowGeo=new T.CircleGeometry(1,10);this.shadows=new T.InstancedMesh(this.shadowGeo,new T.MeshBasicMaterial({color:0x071d26,transparent:true,opacity:.24,depthWrite:false}),420);this.shadows.frustumCulled=false;this.scene.add(this.shadows);
       this.squadRing=new T.Mesh(new T.RingGeometry(1.85,1.91,48),new T.MeshBasicMaterial({color:colors.mint,transparent:true,opacity:.45,side:T.DoubleSide,depthWrite:false}));this.squadRing.rotation.x=-Math.PI/2;this.squadRing.position.set(0,.035,12);this.scene.add(this.squadRing);
       this.squadTag=this.sprite('5 BOTS',colors.mint,2.6,1.1);this.scene.add(this.squadTag);this.lastCount=0;
@@ -351,26 +355,6 @@
       for(const part of [...this.stripes,...this.panels]){if(!groups.has(part.material))groups.set(part.material,[]);groups.get(part.material).push(part);this.world.remove(part);}
       for(const [material,parts]of groups){const mesh=new this.T.InstancedMesh(this.unitCube,material,parts.length);mesh.instanceMatrix.setUsage(this.T.DynamicDrawUsage);mesh.frustumCulled=false;this.world.add(mesh);this.movingBatches.push({mesh,parts});}
     }
-    robotBatch(max,friendly){
-      const T=this.T,body=this.mat(friendly?0x21b894:0xeb745f),head=this.mat(friendly?0x65bca8:0xf9a181),dark=this.mat(friendly?0x174d57:0x583447),eye=this.mat(friendly?0xceff9f:0xffebb0,true);
-      const helmet=new T.SphereGeometry(.5,10,8);
-      const specs=[{p:[0,.62,0],s:[.42,.49,.34],mat:body},{p:[0,1.02,0],s:[.51,.4,.42],mat:head,geo:helmet},{p:[0,1.035,-.202],s:[.35,.095,.025],mat:eye},{p:[-.13,.25,.01],s:[.13,.3,.16],mat:dark,leg:-1},{p:[.13,.25,.01],s:[.13,.3,.16],mat:dark,leg:1},{p:[-.13,.085,-.035],s:[.19,.12,.27],mat:dark,leg:-1},{p:[.13,.085,-.035],s:[.19,.12,.27],mat:dark,leg:1},{p:[.29,.65,-.24],s:[.15,.19,.68],mat:dark},{p:[.29,.67,-.59],s:[.115,.11,.06],mat:eye},{p:[-.26,.65,0],s:[.13,.25,.16],mat:body},{p:[0,.72,.192],s:[.24,.24,.06],mat:dark},{p:[0,.73,.229],s:[.15,.13,.025],mat:eye},{p:[0,1.29,.025],s:[.035,.23,.035],mat:dark},{p:[0,1.43,.025],s:[.08,.08,.08],mat:eye}];
-      const meshes=specs.map(s=>{const m=new T.InstancedMesh(s.geo||this.unitCube,s.mat,max);m.instanceMatrix.setUsage(T.DynamicDrawUsage);m.frustumCulled=false;m.count=0;this.scene.add(m);return m;});return {specs,meshes,max,friendly};
-    }
-    updateRobots(batch,list,t){
-      const T=this.T,n=Math.min(list.length,batch.max);const d=this.dummy;
-      for(let part=0;part<batch.specs.length;part++){
-        const spec=batch.specs[part],mesh=batch.meshes[part];mesh.count=n;
-        for(let i=0;i<n;i++){
-          const p=list[i],scale=p.kind==='brute'?1.45:p.kind==='runner'?.84:1,rot=batch.friendly?0:Math.PI;
-          const bounce=Math.sin(t*11+i*1.7)*.055,step=spec.leg?Math.sin(t*11+i*1.7)*.10*spec.leg:0;
-          const ox=spec.p[0]*scale*(batch.friendly?1:-1),oz=(spec.p[2]+step)*scale*(batch.friendly?1:-1);
-          d.position.set(p.x+ox,spec.p[1]*scale+bounce,p.z+oz);d.rotation.set(0,rot,0);d.scale.set(...spec.s.map(v=>v*scale));d.updateMatrix();mesh.setMatrixAt(i,d.matrix);
-          if(!batch.friendly&&(part===0||part===1)){mesh.setColorAt(i,new T.Color(p.kind==='brute'?0xffc579:p.kind==='runner'?0xf387c4:0xffffff));}
-        }
-        mesh.instanceMatrix.needsUpdate=true;if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;
-      }
-    }
     textTexture(text,color=colors.mint,sub='',transparent=false){
       const key=`${text}-${color}-${sub}-${transparent}`;if(this.textureCache.has(key))return this.textureCache.get(key);
       const c=document.createElement('canvas');c.width=512;c.height=256;const ctx=c.getContext('2d');
@@ -407,15 +391,9 @@
       const tag=this.sprite(p.kind==='recruits'?`+${p.amount}`:icons[p.kind],color,1.9,.85);tag.position.y=2.15;group.add(tag);this.scene.add(group);return group;
     }
     createBoss(){
-      const group=new this.T.Group();
-      const accent=[colors.coral,colors.violet,colors.lime][((game?.sector||1)-1)%3];
-      this.box(group,0,1.6,0,3.4,2.8,2.4,0x5c4451);this.box(group,0,3.1,0,2.6,.35,2.4,0xc78065);
-      this.box(group,0,2.2,1.25,2.4,.45,.09,accent,true);this.box(group,0,1.28,1.27,1.3,.35,.08,0xffc198,true);
-      for(const side of [-1,1]){
-        this.box(group,side*1.95,1.4,.45,.75,1.35,2.4,0x364150);this.box(group,side*1.95,1.45,1.7,.42,.48,.4,accent,true);
-        this.box(group,side*1.2,.36,0,.9,.7,2.5,0x24333e);this.box(group,side*1.2,.33,1.3,.75,.22,.1,0xefbf79,true);
-      }
-      this.box(group,0,3.9,0,.18,1.3,.18,0x879ba0);const core=new this.T.Mesh(new this.T.OctahedronGeometry(.6),this.mat(accent,true));core.position.set(0,4.55,0);group.add(core);group.userData.core=core;
+      const group=new this.T.Group(),accent=[colors.coral,colors.violet,colors.lime][((game?.sector||1)-1)%3];
+      const core=new this.T.Mesh(new this.T.OctahedronGeometry(.34),this.mat(accent,true));core.position.set(0,2.7,.85);group.add(core);group.userData.core=core;
+      const halo=new this.T.Mesh(new this.T.TorusGeometry(1.9,.025,6,40),this.mat(accent,true));halo.rotation.x=-Math.PI/2;halo.position.y=.05;group.add(halo);
       this.scene.add(group);return group;
     }
     createHazard(){
@@ -451,8 +429,12 @@
     render(state,t,dt,attract=false){
       this.capsule.visible=!attract;this.capsuleTag.visible=!attract;
       const poses=Core.formation(state.count,state.x),enemyList=state.enemies;
-      this.updateRobots(this.friends,poses,t);this.updateRobots(this.enemies,enemyList,t);
+      this.friends.update(poses,t,true);
+      for(const [kind,crowd]of Object.entries(this.enemyCrowds))crowd.update(enemyList.filter(e=>(kind==='stalker'?['runner','brute'].includes(e.kind):e.kind===kind)&&e.z>-49&&e.z<18),t);
+      this.bossCrowd.update(state.boss?[{...state.boss,scale:3.15}]:[],t);
       const d=this.dummy;this.shots.count=Math.min(state.shots.length,720);
+      const armored=enemyList.filter(e=>['brute','spitter'].includes(e.kind)&&e.maxHp&&e.z>-30&&e.z<14).slice(0,360);
+      this.armorBars.forEach((mesh,part)=>{mesh.count=armored.length;armored.forEach((e,i)=>{const ratio=part?Math.max(.01,e.hp/e.maxHp):1;d.position.set(e.x-(1-ratio)*.4,e.kind==='brute'?2.6:1.8,e.z);d.rotation.set(0,0,0);d.scale.set(.8*ratio,.055,.09);d.updateMatrix();mesh.setMatrixAt(i,d.matrix);});mesh.instanceMatrix.needsUpdate=true;});
       for(let i=0;i<this.shots.count;i++){const b=state.shots[i];d.position.set(b.x,.68,b.z);d.rotation.set(0,Math.atan(b.dx||0),0);d.scale.set(.055,.065,.7);d.updateMatrix();this.shots.setMatrixAt(i,d.matrix);this.shots.setColorAt(i,new this.T.Color(b.color==='violet'?0xddbeff:0xffffff));}
       this.shots.instanceMatrix.needsUpdate=true;if(this.shots.instanceColor)this.shots.instanceColor.needsUpdate=true;
       const all=[...poses,...enemyList];this.shadows.count=Math.min(all.length,420);
@@ -471,12 +453,12 @@
       for(let i=this.effects.length-1;i>=0;i--){const e=this.effects[i];e.life-=dt;if(e.life<=0){this.scene.remove(e.mesh);if(e.ownsGeometry)e.mesh.geometry.dispose();e.mesh.material.dispose();this.effects.splice(i,1);continue;}e.mesh.material.opacity=Math.min(1,e.life/e.max);if(e.ring)e.mesh.scale.setScalar(1+(1-e.life/e.max)*22);else{e.mesh.position.x+=e.vx*dt;e.mesh.position.y+=e.vy*dt;e.mesh.position.z+=e.vz*dt;e.vy-=dt*7;e.mesh.rotation.x+=dt*3;}}
       this.camera.position.copy(this.baseCamera);
       if(shakeTime>0&&!save.settings.reduced){this.camera.position.x+=(Math.random()-.5)*.12;this.camera.position.y+=(Math.random()-.5)*.1;}
-      this.renderer.toneMappingExposure=1.25+(flashTime>0&&!save.settings.reduced?flashTime*.6:0);this.renderer.render(this.scene,this.camera);$('scene').dataset.drawCalls=String(this.renderer.info.render.calls);
+      this.renderer.toneMappingExposure=1.25+(flashTime>0&&!save.settings.reduced?flashTime*.6:0);this.renderer.render(this.scene,this.camera);$('scene').dataset.drawCalls=String(this.renderer.info.render.calls);$('scene').dataset.triangles=String(this.renderer.info.render.triangles);
     }
   }
   function demoState(t){
     const count=18,x=Math.sin(t*.3)*1.15,enemies=[];
-    for(let i=0;i<16;i++)enemies.push({id:i,x:(i%7-3)*1.06,z:-41+((t*4.2+i*2.3)%45),kind:i%9===0?'brute':'walker'});
+    for(let i=0;i<64;i++)enemies.push({id:i,x:(i%11-5)*.78,z:-44+((t*4.2+Math.floor(i/11)*1.7)%42),kind:i%17===0?'brute':i%13===0?'spitter':i%7===0?'runner':'walker'});
     const shots=[];for(let i=0;i<50;i++)shots.push({x:x+(i%6-2.5)*.55,z:12-((t*25+i*1.2)%52),dx:0});
     return{count,x,enemies,shots,gates:[{id:9001,z:-29+((t*3)%23),offset:0,left:{op:'+',value:4},right:{op:'+',value:2}}],crates:[],pickups:[],hazards:[],boss:null,speed:4,overdrive:0};
   }
@@ -527,5 +509,5 @@
   }
   try{engine=new Scene();}catch(e){console.error(e);showError(e.message);}
   wire();updateSound();refreshSetup();if(engine)requestAnimationFrame(frame);
-  window.NeonSwarm={snapshot:()=>game?{...game.snapshot(),paused,modal:modalKind,learning:activeLesson?{chapter:activeLesson.chapter,level:activeLesson.level,answered:activeLesson.answered,correct:activeLesson.correct}:null}:({phase:activeLesson?'study':'menu',mode:selectedMode,modal:modalKind,storage:storageOK,learning:activeLesson?{chapter:activeLesson.chapter,answered:activeLesson.answered,correct:activeLesson.correct}:null}),version:'2.1.0'};
+  window.NeonSwarm={snapshot:()=>game?{...game.snapshot(),paused,modal:modalKind,learning:activeLesson?{chapter:activeLesson.chapter,level:activeLesson.level,answered:activeLesson.answered,correct:activeLesson.correct}:null}:({phase:activeLesson?'study':'menu',mode:selectedMode,modal:modalKind,storage:storageOK,learning:activeLesson?{chapter:activeLesson.chapter,answered:activeLesson.answered,correct:activeLesson.correct}:null}),version:'2.2.0'};
 })();

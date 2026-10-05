@@ -1,31 +1,27 @@
-# Bodyguard 2.0 balance audit
+# Combat balance — 2.2
 
-The original game allowed a stationary right-lane policy to win 36 of 50 campaigns. The rebuilt rules remove that exploit and slow squad growth.
+The prior Expert opening had about nine fragile enemies per wave, followed by gaps near five seconds. A growing squad could erase waves at long range. This update raises visible density, shortens reinforcement gaps, limits ammunition range, introduces ranged spitters, and keeps mixed reinforcements arriving during bosses.
 
-## Rebuilt campaign results
-
-Thirty seeds per control policy and combat setting; 60 Hz; 360-second limit. Sector upgrades are automatic: repair below 45 integrity, otherwise recruit below 22 bots, otherwise damage. No learning bonuses are included. These policies have perfect access to game state and are not human playtests.
-
-| Setting | Stationary center wins | Stationary right wins | Reactive wins | Interceptor wins | Reactive median defeated-boss time |
+| Setting | Opening wave | Wave at 40 seconds, sector 1 | Base wave gap | Initial shield | Strike warning |
 |---|---:|---:|---:|---:|---:|
-| Explorer | 0/30 | 0/30 | 29/30 | 29/30 | 23.92 s |
-| Standard | 0/30 | 0/30 | 20/30 | 26/30 | 26.53 s |
-| Veteran | 0/30 | 0/30 | 9/30 | 12/30 | 27.85 s |
-| Expert | 0/30 | 0/30 | 6/30 | 6/30 | 34.98 s |
+| Explorer | 10 | 18 | 4.1 s | 12 | 1.65 s |
+| Standard | 17 | 30 | 3.5 s | 8 | 1.35 s |
+| Veteran | 23 | 41 | 2.9 s | 5 | 1.15 s |
+| Expert | 28 | 50 | 2.65 s | 3 | 1.0 s |
 
-No policy reached the 60-bot cap in this audit. All 480 runs ended before the timeout. Boss-time medians include only defeated bosses.
+Gaps shorten by 0.008 seconds per elapsed sector second and another 0.12 seconds each sector, with a minimum of 1.65 seconds. Expert enemies move 12% faster than Standard. Later waves mix runners, armored stalkers, and spitters; formation patterns alternate between broad fronts and concentrated attacks. Pulse ammunition penetrates two enemies, rewarding alignment through rows. Spread and piercing upgrades remain distinct. Ordinary ammunition expires at z=-29, so enemies are engaged on the visible road rather than erased in the distance.
 
-The reactive policy prioritizes gates and pickups, aligns with bosses, and evades warned strikes. The interceptor also prioritizes approaching enemies. Both use earned Overdrive. Stationary policies never activate it.
+Boss reinforcements use 65% of ordinary wave size and arrive at the base gap plus 0.6 seconds. Boss strikes and spitter attacks share a single targeted bolt budget: overlapping unavoidable strike lanes are prevented. A center-targeted bolt remains dodgeable at every squad size. Escaped-enemy capsule loss stays bounded at 12 points per wave; avoiding combat indefinitely still fails. Overdrive clears small enemies and warned bolts, weakens armor, and grants temporary protection, making timing valuable.
 
-## Tuning choices
+The 600-run audit uses 30 campaign seeds for each of five input policies at each difficulty. Three actively steering policies pursue threats and resources; two remain stationary. The strongest tactical policy evaluates lane density, collects upgrades, dodges warned strikes, and chooses Overdrive timing. It has complete game-state access, so results are reproducible engineering evidence, **not measured human win rates**.
 
-- Six initial bots; mostly +2 to +4 gates, less frequent recruitment, +3 sector recruit upgrades.
-- A doubling opportunity is limited to at most one per mission and only when below 16 bots.
-- Capsule damage from leaks is capped per wave; shield and capsule repair offer recovery choices.
-- A seven-column formation gives every squad size a feasible escape from a central targeted strike. Targeted bolts are not stacked into unavoidable patterns.
-- Boss warning and enemy pressure differ by setting. Weapon and rate increases have caps.
-- Learning bonuses are bounded, and final-boss exposure is limited to eight seconds and 25% extra damage.
+| Setting | Tactical policy wins / 30 | Reactive policy wins / 30 | Stationary policy wins / 30 |
+|---|---:|---:|---:|
+| Explorer | 30 | 29 | 0 |
+| Standard | 24 | 8 | 0 |
+| Veteran | 7 | 0 | 0 |
+| Expert | 5 | 0 | 0 |
 
-## Next playtesting
+No audit run hit the 360-second cutoff or the 60-bot squad cap. Expert is intentionally severe, with a demonstrable winning path rather than universal failure. The audit and its runnable source are included as `balance-audit-v3.json` and `tools/balance-audit.js`. Direct playtesting and physical phone performance remain useful follow-up evidence; the audit does not establish ideal balance for every player.
 
-Check actual desktop and phone players with different action-game and A&P experience. Measure understandable deaths, response opportunities, completion, frustration, question feedback use, and later recall. Automated win rates demonstrate exploit resistance and relative pressure, not proof that a difficulty is balanced for people.
+Questions remain untimed, and combat freezes during Focus at every difficulty. Study remains available without combat. Combat difficulty does not alter answer correctness, chapter coverage, or learning progress.

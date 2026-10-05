@@ -1,0 +1,194 @@
+{
+  "version": "2.2.0",
+  "method": "30 campaign seeds per policy and difficulty (five policies, 600 runs); 60Hz, 360-second cutoff. Automatic upgrades add 3 recruits below 22 bots, otherwise damage or repairs below 45 integrity. Tactical policy aims at lane threat density, collects crates and gates, dodges strikes, and uses Overdrive. Policies have perfect game-state visibility and do not predict human win rates.",
+  "profiles": {
+    "explorer": {
+      "stationaryCenter": {
+        "runs": 30,
+        "wins": 0,
+        "timeouts": 0,
+        "medianTime": 41.98,
+        "medianIntegrity": 0,
+        "medianBossSeconds": null,
+        "reachedCap": 0
+      },
+      "stationaryRight": {
+        "runs": 30,
+        "wins": 0,
+        "timeouts": 0,
+        "medianTime": 39.73,
+        "medianIntegrity": 0,
+        "medianBossSeconds": null,
+        "reachedCap": 0
+      },
+      "reactive": {
+        "runs": 30,
+        "wins": 29,
+        "timeouts": 0,
+        "medianTime": 225.1,
+        "medianIntegrity": 52,
+        "medianBossSeconds": 28.67,
+        "reachedCap": 0
+      },
+      "interceptor": {
+        "runs": 30,
+        "wins": 29,
+        "timeouts": 0,
+        "medianTime": 207.9,
+        "medianIntegrity": 100,
+        "medianBossSeconds": 25.72,
+        "reachedCap": 0
+      },
+      "tactical": {
+        "runs": 30,
+        "wins": 30,
+        "timeouts": 0,
+        "medianTime": 198.65,
+        "medianIntegrity": 100,
+        "medianBossSeconds": 21.38,
+        "reachedCap": 0
+      }
+    },
+    "standard": {
+      "stationaryCenter": {
+        "runs": 30,
+        "wins": 0,
+        "timeouts": 0,
+        "medianTime": 34.58,
+        "medianIntegrity": 0,
+        "medianBossSeconds": null,
+        "reachedCap": 0
+      },
+      "stationaryRight": {
+        "runs": 30,
+        "wins": 0,
+        "timeouts": 0,
+        "medianTime": 34.55,
+        "medianIntegrity": 0,
+        "medianBossSeconds": null,
+        "reachedCap": 0
+      },
+      "reactive": {
+        "runs": 30,
+        "wins": 8,
+        "timeouts": 0,
+        "medianTime": 177.92,
+        "medianIntegrity": 9,
+        "medianBossSeconds": 35.5,
+        "reachedCap": 0
+      },
+      "interceptor": {
+        "runs": 30,
+        "wins": 17,
+        "timeouts": 0,
+        "medianTime": 218.12,
+        "medianIntegrity": 78,
+        "medianBossSeconds": 34.12,
+        "reachedCap": 0
+      },
+      "tactical": {
+        "runs": 30,
+        "wins": 24,
+        "timeouts": 0,
+        "medianTime": 210.35,
+        "medianIntegrity": 98,
+        "medianBossSeconds": 27.07,
+        "reachedCap": 0
+      }
+    },
+    "veteran": {
+      "stationaryCenter": {
+        "runs": 30,
+        "wins": 0,
+        "timeouts": 0,
+        "medianTime": 28.87,
+        "medianIntegrity": 4,
+        "medianBossSeconds": null,
+        "reachedCap": 0
+      },
+      "stationaryRight": {
+        "runs": 30,
+        "wins": 0,
+        "timeouts": 0,
+        "medianTime": 28.83,
+        "medianIntegrity": 4,
+        "medianBossSeconds": null,
+        "reachedCap": 0
+      },
+      "reactive": {
+        "runs": 30,
+        "wins": 0,
+        "timeouts": 0,
+        "medianTime": 40.72,
+        "medianIntegrity": 48,
+        "medianBossSeconds": null,
+        "reachedCap": 0
+      },
+      "interceptor": {
+        "runs": 30,
+        "wins": 0,
+        "timeouts": 0,
+        "medianTime": 39.12,
+        "medianIntegrity": 64,
+        "medianBossSeconds": 61.23,
+        "reachedCap": 0
+      },
+      "tactical": {
+        "runs": 30,
+        "wins": 7,
+        "timeouts": 0,
+        "medianTime": 156.37,
+        "medianIntegrity": 49,
+        "medianBossSeconds": 33.6,
+        "reachedCap": 0
+      }
+    },
+    "expert": {
+      "stationaryCenter": {
+        "runs": 30,
+        "wins": 0,
+        "timeouts": 0,
+        "medianTime": 26.87,
+        "medianIntegrity": 4,
+        "medianBossSeconds": null,
+        "reachedCap": 0
+      },
+      "stationaryRight": {
+        "runs": 30,
+        "wins": 0,
+        "timeouts": 0,
+        "medianTime": 24.67,
+        "medianIntegrity": 16,
+        "medianBossSeconds": null,
+        "reachedCap": 0
+      },
+      "reactive": {
+        "runs": 30,
+        "wins": 0,
+        "timeouts": 0,
+        "medianTime": 37.75,
+        "medianIntegrity": 33,
+        "medianBossSeconds": 23.2,
+        "reachedCap": 0
+      },
+      "interceptor": {
+        "runs": 30,
+        "wins": 0,
+        "timeouts": 0,
+        "medianTime": 37.77,
+        "medianIntegrity": 70,
+        "medianBossSeconds": 28.37,
+        "reachedCap": 0
+      },
+      "tactical": {
+        "runs": 30,
+        "wins": 5,
+        "timeouts": 0,
+        "medianTime": 74.58,
+        "medianIntegrity": 42,
+        "medianBossSeconds": 31.92,
+        "reachedCap": 0
+      }
+    }
+  }
+}
