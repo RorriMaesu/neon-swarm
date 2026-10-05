@@ -24,12 +24,14 @@ jobs:
           node --check game.js
           node --check curriculum.js
           node --check learning.js
+          node --check section-catalog.js
+          for chapter in content/*.js; do node --check "$chapter"; done
           node --test tests/*.test.js
       - name: Prepare the static game
         run: |
           mkdir -p _site
-          cp index.html style.css core.js curriculum.js learning.js game.js LICENSE.md CONTENT.md .nojekyll _site/
-          cp -r assets vendor _site/
+          cp index.html style.css core.js curriculum.js section-catalog.js learning.js game.js LICENSE.md CONTENT.md COVERAGE.md coverage.json .nojekyll _site/
+          cp -r assets vendor content _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

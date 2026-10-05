@@ -21,3 +21,12 @@ Open index.html or double-click Play Neon Swarm.cmd to play. This folder is upda
 - Saved missions restore combat and learning; sector retry, export/import, and version 1 record migration are implemented.
 - 25 rule and learning checks passed; a 480-run balance audit and desktop/phone-layout browser checks passed.
 - The playable Desktop copy is updated as development progresses. Content and physical-device review limits are recorded in QA.md.
+
+## Section expansion 2.1 checkpoint
+
+- Added 15,976 source-linked questions across all 169 numbered sections and 28 introductions.
+- The source map includes 606 learning objectives, 1,724 table questions, and 52 authored mechanism/career supplements.
+- Added section selection, a coverage browser, distinct-question progress, 20/40/full Study sets, unseen-question priority, and compact saved decks.
+- Preserved prior checkpoints and records.
+- All 31 automated checks and section-focused desktop/phone browser checks passed.
+- COVERAGE.md and coverage.json document the scope and instructor-review limits.

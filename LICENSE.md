@@ -14,11 +14,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ## Learning content
 
-Original concept descriptions, questions, scenarios, pathways, diagrams, and explanations are licensed under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International. Attribute Neon Swarm: Bodyguard contributors and preserve source references. Noncommercial adaptations must use the same license. This section applies to curriculum.js and educational text and diagrams in game.js; the MIT grant above does not override this content license.
+Original and adapted concept descriptions, questions, scenarios, pathways, diagrams, and explanations are licensed under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International. Attribute Neon Swarm: Bodyguard contributors and preserve source references. Noncommercial adaptations must use the same license. This section applies to curriculum.js, section-catalog.js data, content/ question data, coverage.json, and educational text and diagrams in game.js; the MIT grant above does not override this content license.
 
 License: https://creativecommons.org/licenses/by-nc-sa/4.0/
 
-The content is independently written and aligned with OpenStax Anatomy and Physiology 2e (2022), by J. Gordon Betts, Kelly A. Young, James A. Wise, Eddie Johnson, Brandon Poe, Dean H. Kruse, Oksana Korol, Jody E. Johnson, Mark Womble, and Peter DeSaix. Current edition/reuse guidance is linked from the preface. Every chapter and learning encounter links to the relevant public book reference. No textbook images, logos, or restricted instructor materials are included.
+The original prompts are independently written; the expanded bank adapts public definitions, explanatory statements, tables, and section objectives from OpenStax Anatomy and Physiology 2e (2022), by J. Gordon Betts, Kelly A. Young, James A. Wise, Eddie Johnson, Brandon Poe, Dean H. Kruse, Oksana Korol, Jody E. Johnson, Mark Womble, and Peter DeSaix. Current edition/reuse guidance is linked from the preface. Every chapter and learning encounter links to the relevant public book reference. No textbook images, logos, or restricted instructor materials are included.
 
 Access for free at https://openstax.org/books/anatomy-and-physiology-2e/pages/1-introduction
 
