@@ -1,5 +1,5 @@
 {
-  "version": "2.3.0",
+  "version": "2.3.1",
   "originalQuestions": 15976,
   "retainedQuestions": 10195,
   "retiredQuestions": 5781,
@@ -82458,7 +82458,8 @@
         "distinct alternatives"
       ],
       "changes": [
-        "rewrote instruction and contextual hint"
+        "rewrote instruction and contextual hint",
+        "editorially clarified a broad brain-output passage into a unique division-identification question"
       ]
     },
     {

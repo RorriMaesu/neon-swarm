@@ -85,3 +85,5 @@ Open index.html or double-click Play Neon Swarm.cmd to play. This folder is upda
 - Preserved all sections, previously represented teaching headings, objectives, and historical progress.
 - Added persistent presentation and per-question review history, source-fact cooldowns, boss selection with history, labeled spaced retries, and refreshed older checkpoints.
 - All 47 automated checks and final local browser checks pass, including repeated-session variety, labeled review, progress transfer, old-session migration, phone layouts, and offline animated models.
+
+- GitHub Pages and all 28 hosted banks passed the review scenarios; final release 2.3.1 clarifies the diencephalon identification prompt.

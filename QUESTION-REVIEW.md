@@ -1,4 +1,4 @@
-# Question review and variety — 2.3.0
+# Question review and variety — 2.3.1
 
 Both reported prompts were removed: the nervous-tissue link instruction and the chapter objective about identifying tissue types. New direct questions ask about the four primary tissue types, neuron signaling, neuroglia, dendrites, the soma, and axons.
 

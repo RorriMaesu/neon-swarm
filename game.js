@@ -512,5 +512,5 @@
   }
   try{engine=new Scene();}catch(e){console.error(e);showError(e.message);}
   wire();updateSound();refreshSetup();if(engine)requestAnimationFrame(frame);
-  window.NeonSwarm={snapshot:()=>game?{...game.snapshot(),paused,modal:modalKind,learning:activeLesson?{chapter:activeLesson.chapter,level:activeLesson.level,answered:activeLesson.answered,correct:activeLesson.correct}:null}:({phase:activeLesson?'study':'menu',mode:selectedMode,modal:modalKind,storage:storageOK,learning:activeLesson?{chapter:activeLesson.chapter,answered:activeLesson.answered,correct:activeLesson.correct}:null}),version:'2.3.0'};
+  window.NeonSwarm={snapshot:()=>game?{...game.snapshot(),paused,modal:modalKind,learning:activeLesson?{chapter:activeLesson.chapter,level:activeLesson.level,answered:activeLesson.answered,correct:activeLesson.correct}:null}:({phase:activeLesson?'study':'menu',mode:selectedMode,modal:modalKind,storage:storageOK,learning:activeLesson?{chapter:activeLesson.chapter,answered:activeLesson.answered,correct:activeLesson.correct}:null}),version:'2.3.1'};
 })();
