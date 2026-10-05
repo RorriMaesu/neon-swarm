@@ -8,7 +8,7 @@ Build a squad of repair bots, defend a research capsule, and practice anatomy an
 
 For the Desktop copy, double-click **Play Neon Swarm.cmd** or open **index.html**. All gameplay scripts, content, and 3D assets are included locally; textbook links and some device speech voices need an internet connection. No build step, sign-in, payment, or API key is required.
 
-Choose Chapter mission, Study, Arcade, Endless, or Daily. Study has no combat and remains usable when WebGL is unavailable. Any of the 28 chapters can be selected immediately. Section practice includes 15,976 source-linked questions across all 169 numbered sections and 28 introductions. Explore section coverage lists objectives, topics, counts, and your progress. Study offers 20, 40, or the full set; chapter missions sample a short set. See COVERAGE.md for the scope and review limits.
+Choose Chapter mission, Study, Arcade, Endless, or Daily. Study has no combat and remains usable when WebGL is unavailable. Any of the 28 chapters can be selected immediately. Section practice includes 10,296 source-linked questions across all 169 numbered sections and 28 introductions. Explore section coverage lists objectives, topics, counts, and your progress. Study offers 20, 40, or the full set; chapter missions sample a short set. See COVERAGE.md for the scope and review limits.
 
 Detailed animated characters replace the original primitive figures. Four CC0 Quaternius characters include running mechs, flying swarm drones, armored stalkers, spitters, and a scaled animated boss. The game shares animation textures across the crowd to keep drawing costs bounded. See ASSETS.md for source models, Blender processing, and the Meshy replacement plan.
 
@@ -23,7 +23,7 @@ Detailed animated characters replace the original primitive figures. Four CC0 Qu
 | Select an answer by keyboard | Number keys | Onscreen targets |
 | Pause | P, Escape, or pause button | Pause button |
 
-Combat, warnings, charge, and buffs freeze during Focus. Held controls cannot submit answers. Pathways require one stage at a time. Hints count as assisted practice. Wrong answers show an explanation and are revisited after intervening concepts or in a later session.
+Combat, warnings, charge, and buffs freeze during Focus. Held controls cannot submit answers. Pathways require one stage at a time. Hints count as assisted practice. Wrong answers show an explanation. Deliberate retries are labeled and follow at least two other facts, or stay due for a later session. Fresh question selection respects question and source-fact history across sessions, including abandoned questions and boss encounters. Default sessions include at most 20% due review when fresh facts are available; the missed & due option focuses on review.
 
 Correct independent recall awards at most six bonus shield points per sector. Three final-boss decisions can expose a short weak point; the maximum reward is eight seconds with 25% additional boss damage. Knowledge progress is recorded separately from combat survival and score.
 
@@ -39,20 +39,20 @@ See **BALANCE.md** for measured simulation results and **QA.md** for verificatio
 
 Preferences, chapter progress, records, and an in-progress mission are stored in this browser. The game saves at Focus checkpoints, between sectors, and periodically during combat. Save & return to setup preserves a mission. Continue saved mission restores it. Partial pathway entry restarts the current pathway; using a hint remains recorded through saving.
 
-Question banks load per chapter. Saved sessions store compact question IDs and answer order, so a full Study set can resume without saving all its text. Prior 2.0 checkpoints and learning records remain readable. New section question coverage is tracked separately from the original sampler.
+Question banks load per chapter. Saved sessions store compact question IDs and answer order, so a full Study set can resume without saving all its text. Earlier learning records remain readable. Older saved sessions are refreshed with the reviewed questions while preserving completed attempts and combat state. New section question coverage is tracked separately from the original sampler.
 
-Settings provides progress export/import for moving learning data between devices. Import merges newer objective records. There is no automatic cloud synchronization. Reset learning asks before clearing it. Retained requires varied, unassisted recall on later days (different forms or questions); a later mistake returns the concept to Practicing. Existing version 1 arcade records are preserved, and new scores are separated by version, mode, difficulty, chapter, learning level, and practice focus.
+Settings provides progress export/import for moving learning data between devices. Import merges newer objective records and question presentation history. There is no automatic cloud synchronization. Reset learning asks before clearing it. Retained requires varied, unassisted recall on later days (different forms or questions); a later mistake returns the concept to Practicing. Existing version 1 arcade records are preserved, and new scores are separated by version, mode, difficulty, chapter, learning level, and practice focus.
 
 ## Source
 
 - `core.js`: seeded combat rules, profiles, capsule defense, checkpoint restore.
 - `curriculum.js`: original authored concepts, 16 pathways, chapter references.
-- `section-catalog.js` and `content/`: section map and 15,976 static source-linked questions.
+- `section-catalog.js` and `content/`: section map and 10,296 static source-linked questions.
 - `learning.js`: question preparation, section selection, review priority, compact checkpoints, progress validation.
 - `game.js`: 3D scene, interface, audio, input, educational encounters.
 - `characters.js` and `assets/characters/`: animated mesh crowds, rigged GLB exports, original source models, and the runtime pose data.
 - `index.html` and `style.css`: responsive and keyboard-accessible interface.
-- `tests/`: 31 rule, save, learning, and section-coverage checks.
+- `tests/`: 47 rule, save, learning, character, and question-review checks.
 - `CONTENT.md`: coverage and source notes.
 - `LICENSE.md`: code, learning content, and asset notices.
 

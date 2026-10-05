@@ -1,8 +1,8 @@
-# Bodyguard 2.0 verification
+# Bodyguard verification — current release 2.3
 
 ## Rules and learning
 
-31 Node checks pass, including complete section-bank checks. The combat checks cover: gate math, road-safe formations, date seeding, one-time gate selection, crate collection, shield defeat, bounded Overdrive, boss transitions, seeded replay, late endless pressure, selectable profiles, leaks and per-wave caps, a feasible escape for every squad size, bounded doubling, capped learning bonuses, deterministic checkpoint restoration, all 28 chapter banks, shuffled correct-answer identities, focused-topic selection, assisted and later-day progress, import validation, appropriate feedback gauges, and bounded boss exposure.
+47 Node checks pass, including complete section-bank and question-review checks. The combat checks cover: gate math, road-safe formations, date seeding, one-time gate selection, crate collection, shield defeat, bounded Overdrive, boss transitions, seeded replay, late endless pressure, selectable profiles, leaks and per-wave caps, a feasible escape for every squad size, bounded doubling, capped learning bonuses, deterministic checkpoint restoration, all 28 chapter banks, shuffled correct-answer identities, focused-topic selection, assisted and later-day progress, import validation, appropriate feedback gauges, and bounded boss exposure.
 
 The campaign balance audit covers 480 runs, across four policies and four combat settings. See BALANCE.md. No stationary policy won; the settings produce clearly different pressure. This is not a human usability or learning-effectiveness study.
 
@@ -16,7 +16,7 @@ The runtime contains only relative local scripts and assets. No runtime question
 
 ## Content review and limits
 
-Core concepts were author-checked against public OpenStax chapter references. The expanded bank contains 15,976 source-linked questions, including public definitions, passage completion, table relationships, and authored supplements. Every numbered section and introduction has questions; all named explanatory headings are represented. The original authored prompts and simplified diagrams are also preserved. See COVERAGE.md for the scope of this audit. It has not received an independent A&P instructor review. Automated content checks detect structural errors, not every possible ambiguity or factual error. Additional objectives can be added using the same content format.
+Core concepts were author-checked against public OpenStax chapter references. The reviewed bank contains 10,296 source-linked questions, including public definitions, passage completion, table relationships, and authored supplements. Every numbered section and introduction has questions; all named explanatory headings are represented. The original authored prompts and simplified diagrams are also preserved. See COVERAGE.md for the scope of this audit. It has not received an independent A&P instructor review. Automated content checks detect structural errors, not every possible ambiguity or factual error. Additional objectives can be added using the same content format.
 
 Phone checks use viewport emulation on this PC. Physical iOS/Android touch behavior, sustained frame rate, and device speech voices remain to be field-tested. The read-aloud control depends on browser/device support. Local progress is per browser; export/import transfers learning records, not automatic cross-device sync.
 
@@ -35,3 +35,13 @@ All 37 game, learning, and character checks pass. New checks cover denser Expert
 Isolated Edge checks passed all chapter/section controls, full-section practice, educational Focus freezing, boss decisions, hints and saves, steering, combat pause/resume, defeat/retry, keyboard answers, progress export/import, and 320/390-pixel phone layouts. A stress fixture displayed 135 Expert enemies with all four model assets loaded, 85 total scene draw calls, about 319,470 rendered triangles, and no JavaScript, shader, or failed-request errors. Those are rendering counts on this PC, not a physical-phone frame-rate claim.
 
 Source GLTF and optimized GLB files are included; active animations are interpolated locomotion clips with per-character phases. Attack, reaction, and death clips remain available in the exports but are not separate gameplay animation states yet. Meshy custom generation has not occurred: the signed-in workspace showed 0 credits, and a spending limit was not supplied.
+
+## Question review and variety 2.3 verification
+
+Every previous question has an editorial disposition in question-review.json. 5,781 unsafe items were retired and 101 source-grounded questions were added to preserve affected topics; 10,296 questions remain. All 169 numbered sections, 28 introductions, previously represented teaching headings, and 606 learning goals remain represented. Source-aware screening covers navigation/objectives, missing references and figures, malformed blanks, scientific target identity, aliases and choices, and unique structured table rows. This combines automated full-bank checks and targeted editorial review; it is not individual instructor approval of every retained item.
+
+All 47 Node checks pass. An isolated Edge browser verified 12 successive abandoned sessions with fresh facts, reload persistence, labeled missed-answer reviews after two intervening facts, compact retry restoration, presentation-history export/import between browser contexts, and migration of the exact retired nervous-tissue link question while preserving completed results and historical question IDs.
+
+The final bank also passed all chapter/section selectors, scoped Study sessions, full-section completion, hints and wrong-answer resume, frozen combat during Focus, coverage browsing, and 320/390-pixel phone layouts with no browser exceptions or failed requests. Three final-boss decisions and hint restoration passed. Animated asset and offline checks passed with 135 Expert enemies, 85 scene draw calls, no shader errors, and direct-file chapter 28 Study loading.
+
+Local browser reports are saved in the development workspace. Hosted verification runs the same review scenarios against the published game. Physical-phone and independent instructor-review limits described above still apply.

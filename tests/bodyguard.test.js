@@ -38,7 +38,7 @@ test('lesson campaigns finish after three bosses and preserve sector retry state
 test('all 28 expanded chapter banks have unique answer identities and valid source references',()=>{
  assert.deepEqual(Curriculum.chapters.map(c=>c.id),Array.from({length:28},(_,i)=>i+1));const ids=new Set();
  for(const c of Curriculum.chapters){assert.equal(c.concepts.length,8);for(const level of Learning.validLevels){const items=Learning.makeItems(c.id,level);assert(items.length>=8);for(const item of items){assert(!ids.has(item.id));ids.add(item.id);assert(item.explanation&&item.hint&&item.source.startsWith('https://openstax.org/'));if(item.kind==='sequence'){assert(item.steps.length>=3);assert.equal(new Set(item.steps).size,item.steps.length);}else{assert.equal(item.options.filter(o=>o.id===item.answer).length,1);assert.equal(new Set(item.options.map(o=>o.label)).size,item.options.length);}}}}
- assert(ids.size>=15000);assert.equal(Curriculum.summary.numberedSections,169);
+ assert(ids.size>=Curriculum.summary.questions);assert.equal(Curriculum.summary.numberedSections,169);
 });
 test('seeded decks keep correct identities after shuffling and respect selected focus',()=>{
  for(const c of Curriculum.chapters)for(const level of Learning.validLevels){const a=Learning.buildDeck(c.id,level,'all',123),b=Learning.buildDeck(c.id,level,'all',123);assert.deepEqual(a,b);for(const i of a){if(i.kind!=='sequence'){assert.equal(i.options.filter(o=>o.id===i.answer).length,1);assert(i.options.length>=2&&i.options.length<=4);}}}
