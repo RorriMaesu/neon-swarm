@@ -2,7 +2,7 @@
 
 ## Game rules
 
-Nine checks passed with Node’s built-in test runner: arithmetic operations and overflow; formation stays inside the road without stacking bots onto one edge; date seeding; one-time gate selection; crate break and collection; shields and defeat; Overdrive requirements and effects; mode-specific boss transitions; seeded repeatability.
+Ten checks passed with Node’s built-in test runner: arithmetic operations and overflow; formation stays inside the road without stacking bots onto one edge; date seeding; one-time gate selection; crate break and collection; shields and defeat; Overdrive requirements and effects; mode-specific boss transitions; seeded repeatability; late endless difficulty scales faster than weapon upgrades.
 
 An automated player completed 20 of 20 seeded campaigns. Winning runs took about 136–148 seconds. This checks that full campaigns are reachable through ordinary steering, crate collection, gate choices, and earned Overdrive. It is not a substitute for human fun testing.
 

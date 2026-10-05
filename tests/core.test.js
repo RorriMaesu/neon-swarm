@@ -54,3 +54,9 @@ test('identical seeds and steering inputs reproduce a complete first sector',()=
   assert.deepEqual(a.snapshot(),b.snapshot());
   assert(['playing','upgrade','result'].includes(a.phase));assert(a.shots.length<=720);
 });
+test('late endless sectors become tougher faster than linear weapon upgrades',()=>{
+  const endless=new Game('endless',51),ordinary=new Game('campaign',51);
+  endless.sector=ordinary.sector=12;endless.spawnWave();ordinary.spawnWave();endless.spawnBoss();ordinary.spawnBoss();
+  assert(endless.boss.hp>ordinary.boss.hp*2);
+  assert(endless.enemies.every((e,i)=>e.hp>ordinary.enemies[i].hp*2));
+});

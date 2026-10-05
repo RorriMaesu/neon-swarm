@@ -110,13 +110,15 @@
         const r=this.rng();
         if(this.sectorTime>12 && r<.13) kind='runner';
         else if(this.sectorTime>20 && r>.82) kind='brute';
-        const hp = kind==='brute'?10+this.sector*3:kind==='runner'?2+this.sector:2+Math.floor(this.sector*.8);
+        const pressure=this.mode==='endless'?Math.pow(1.18,Math.max(0,this.sector-3)):1;
+        const hp = Math.ceil((kind==='brute'?10+this.sector*3:kind==='runner'?2+this.sector:2+Math.floor(this.sector*.8))*pressure);
         const x = spread<.38?clamp(lane+(i%3-1)*.65,-4.1,4.1):-3.9+(i%9)*.96+(this.rng()-.5)*.22;
         this.enemies.push({id:this.uid(),x,z:z-Math.floor(i/9)*1.7-this.rng()*2,kind,hp,maxHp:hp,speed:kind==='runner'?1.55:kind==='brute'?.72:1,damage:kind==='brute'?4:kind==='runner'?2:1,wobble:this.rng()*6.28});
       }
     }
     spawnBoss() {
-      const hp = 620 + this.sector*360;
+      const pressure=this.mode==='endless'?Math.pow(1.12,Math.max(0,this.sector-3)):1;
+      const hp = Math.round((620 + this.sector*360)*pressure);
       this.boss = {id:this.uid(),x:0,z:-34,hp,maxHp:hp,attack:2.2,age:0};
       this.bossAppeared = true;
       this.emit('boss',{sector:this.sector});
