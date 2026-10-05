@@ -368,5 +368,5 @@
   try{engine=new Scene();}catch(e){console.error(e);showError(e.message);}
   wire();updateSound();refreshRecord();if(engine)requestAnimationFrame(frame);
   // A read-only snapshot helps reproduce issues without exposing or mutating the run.
-  window.NeonSwarm={snapshot:()=>game?{...game.snapshot(),paused}:({phase:'menu',mode:selectedMode,storage:storageOK}),version:'1.0.0'};
+  window.NeonSwarm={snapshot:()=>game?{...game.snapshot(),paused}:({phase:'menu',mode:selectedMode,storage:storageOK}),version:'1.0.1'};
 })();

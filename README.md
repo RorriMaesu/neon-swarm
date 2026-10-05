@@ -46,6 +46,8 @@ Personal bests and preferences use browser local storage. Offline-file and hoste
 
 Edit the HTML, CSS, or JavaScript and reopen/reload the page. For a local web preview, run `python -m http.server 8787` from this folder and visit `http://127.0.0.1:8787`.
 
+For hosted updates, bump the version queries in `index.html` when changing the game scripts or stylesheet so returning players receive the new assets.
+
 Run rule checks with `node --test tests/core.test.js`. No dependencies need to be installed. Static scenery and crowds use instancing to reduce draw calls. The low-quality option caps render resolution for slower devices. A current browser with WebGL is required.
 
 ## Publish your own copy
